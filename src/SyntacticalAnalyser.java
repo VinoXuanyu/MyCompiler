@@ -8,7 +8,7 @@ public class SyntacticalAnalyser {
     public Token curToken;
     public static ArrayList<String> syntactic = new ArrayList<>();
 
-    public static String wrap(Nonterminal nonterminal) {
+    public static String wrapNonterminal(Nonterminal nonterminal) {
         return "<" + nonterminal.toString() + ">";
     }
 
@@ -22,7 +22,6 @@ public class SyntacticalAnalyser {
     public void moveForward() {
         curToken = tokens.get(p);
         syntactic.add(curToken.toString());
-
         p++;
     }
 
@@ -68,7 +67,7 @@ public class SyntacticalAnalyser {
             handleError();
         }
 
-        syntactic.add(wrap(Nonterminal.CompUnit));
+        syntactic.add(wrapNonterminal(Nonterminal.CompUnit));
     }
 
     public void handleDecl() {
@@ -104,7 +103,7 @@ public class SyntacticalAnalyser {
         moveForward(); // =
         handleConstInitVal();
 
-        syntactic.add(wrap(Nonterminal.ConstDef));
+        syntactic.add(wrapNonterminal(Nonterminal.ConstDef));
     }
 
     public void handleFuncDef() {
@@ -134,7 +133,7 @@ public class SyntacticalAnalyser {
 
         handleBlock();
 
-        syntactic.add(wrap(Nonterminal.FuncDef));
+        syntactic.add(wrapNonterminal(Nonterminal.FuncDef));
     }
 
     public void handleMainFuncDef() {
@@ -146,7 +145,7 @@ public class SyntacticalAnalyser {
         moveForward(); // )
 
         handleBlock();
-        syntactic.add(wrap(Nonterminal.MainFuncDef));
+        syntactic.add(wrapNonterminal(Nonterminal.MainFuncDef));
 
     }
 
@@ -162,7 +161,7 @@ public class SyntacticalAnalyser {
         }
         moveForward(); // }
 
-        syntactic.add(wrap(Nonterminal.Block));
+        syntactic.add(wrapNonterminal(Nonterminal.Block));
     }
 
     public void handleBlockItem() {
@@ -257,7 +256,7 @@ public class SyntacticalAnalyser {
             moveForward(); // ;
         }
 
-        syntactic.add(wrap(Nonterminal.Stmt));
+        syntactic.add(wrapNonterminal(Nonterminal.Stmt));
     }
 
     public void handleFuncFParams() {
@@ -271,7 +270,7 @@ public class SyntacticalAnalyser {
             token = lookAhead();
         }
 
-        syntactic.add(wrap(Nonterminal.FuncFParams));
+        syntactic.add(wrapNonterminal(Nonterminal.FuncFParams));
     }
 
     public void handleFuncFParam() {
@@ -292,7 +291,7 @@ public class SyntacticalAnalyser {
             }
         }
 
-        syntactic.add(wrap(Nonterminal.FuncFParam));
+        syntactic.add(wrapNonterminal(Nonterminal.FuncFParam));
     }
 
     public void handleFuncType() {
@@ -300,7 +299,7 @@ public class SyntacticalAnalyser {
 
         moveForward(); // void | int
 
-        syntactic.add(wrap(Nonterminal.FuncType));
+        syntactic.add(wrapNonterminal(Nonterminal.FuncType));
     }
 
     public void handleConstInitVal() {
@@ -322,7 +321,7 @@ public class SyntacticalAnalyser {
             handleConstExp(getExp());
         }
 
-        syntactic.add(wrap(Nonterminal.ConstInitVal));
+        syntactic.add(wrapNonterminal(Nonterminal.ConstInitVal));
     }
 
     public void handleBType() {
@@ -348,7 +347,7 @@ public class SyntacticalAnalyser {
         }
         moveForward(); // ;
 
-        syntactic.add(wrap(Nonterminal.ConstDecl));
+        syntactic.add(wrapNonterminal(Nonterminal.ConstDecl));
     }
 
     public void handleVarDecl() {
@@ -364,7 +363,7 @@ public class SyntacticalAnalyser {
         }
         moveForward(); // ;
 
-        syntactic.add(wrap(Nonterminal.VarDecl));
+        syntactic.add(wrapNonterminal(Nonterminal.VarDecl));
     }
 
     public void handleVarDef() {
@@ -384,7 +383,7 @@ public class SyntacticalAnalyser {
             handleInitVal();
         }
 
-        syntactic.add(wrap(Nonterminal.VarDef));
+        syntactic.add(wrapNonterminal(Nonterminal.VarDef));
     }
 
     public void handleInitVal() {
@@ -408,7 +407,7 @@ public class SyntacticalAnalyser {
             handleExp(getExp());
         }
 
-        syntactic.add(wrap(Nonterminal.InitVal));
+        syntactic.add(wrapNonterminal(Nonterminal.InitVal));
     }
 
     public void handleExp(ArrayList<Token> exp) {
@@ -416,7 +415,7 @@ public class SyntacticalAnalyser {
 
         handleAddExp(exp);
 
-        syntactic.add(wrap(Nonterminal.Exp));
+        syntactic.add(wrapNonterminal(Nonterminal.Exp));
     }
 
     public void handleCond() {
@@ -424,7 +423,7 @@ public class SyntacticalAnalyser {
 
         handleLOrExp(getExp());
 
-        syntactic.add(wrap(Nonterminal.Cond));
+        syntactic.add(wrapNonterminal(Nonterminal.Cond));
     }
 
     public void handleFuncRParams(ArrayList<Token> exp) {
@@ -437,7 +436,7 @@ public class SyntacticalAnalyser {
             }
         }
 
-        syntactic.add(wrap(Nonterminal.FuncRParams));
+        syntactic.add(wrapNonterminal(Nonterminal.FuncRParams));
     }
 
     public void handleRelExp(ArrayList<Token> exp) {
@@ -446,7 +445,7 @@ public class SyntacticalAnalyser {
         for (ArrayList<Token> exp1 : expression.getTokens()) {
             handleAddExp(exp1);
 
-            syntactic.add(wrap(Nonterminal.RelExp));
+            syntactic.add(wrapNonterminal(Nonterminal.RelExp));
 
             if (j < expression.getSymbols().size()) {
                 syntactic.add(expression.getSymbols().get(j++).toString());
@@ -460,7 +459,7 @@ public class SyntacticalAnalyser {
         for (ArrayList<Token> exp1 : expression.getTokens()) {
             handleRelExp(exp1);
 
-            syntactic.add(wrap(Nonterminal.EqExp));
+            syntactic.add(wrapNonterminal(Nonterminal.EqExp));
 
             if (j < expression.getSymbols().size()) {
                 syntactic.add(expression.getSymbols().get(j++).toString());
@@ -474,7 +473,7 @@ public class SyntacticalAnalyser {
         for (ArrayList<Token> exp1 : expression.getTokens()) {
             handleEqExp(exp1);
 
-            syntactic.add(wrap(Nonterminal.LAndExp));
+            syntactic.add(wrapNonterminal(Nonterminal.LAndExp));
 
             if (j < expression.getSymbols().size()) {
                 syntactic.add(expression.getSymbols().get(j++).toString());
@@ -488,7 +487,7 @@ public class SyntacticalAnalyser {
         for (ArrayList<Token> exp1 : expression.getTokens()) {
             handleLAndExp(exp1);
 
-            syntactic.add(wrap(Nonterminal.LOrExp));
+            syntactic.add(wrapNonterminal(Nonterminal.LOrExp));
 
             if (j < expression.getSymbols().size()) {
                 syntactic.add(expression.getSymbols().get(j++).toString());
@@ -525,13 +524,13 @@ public class SyntacticalAnalyser {
             }
         }
 
-        syntactic.add(wrap(Nonterminal.LVal));
+        syntactic.add(wrapNonterminal(Nonterminal.LVal));
     }
 
     public void handleNumber(Token token) {
         syntactic.add(token.toString());
 
-        syntactic.add(wrap(Nonterminal.Number));
+        syntactic.add(wrapNonterminal(Nonterminal.Number));
     }
 
     public void handlePrimaryExp(ArrayList<Token> exp) {
@@ -549,7 +548,7 @@ public class SyntacticalAnalyser {
             handleError();
         }
 
-        syntactic.add(wrap(Nonterminal.PrimaryExp));
+        syntactic.add(wrapNonterminal(Nonterminal.PrimaryExp));
     }
 
     public void handleUnaryExp(ArrayList<Token> exp) {
@@ -573,14 +572,14 @@ public class SyntacticalAnalyser {
                 handlePrimaryExp(exp);
             }
         }
-        syntactic.add(wrap(Nonterminal.UnaryExp));
+        syntactic.add(wrapNonterminal(Nonterminal.UnaryExp));
 
     }
 
     public void handleUnaryOp(Token token) {
         syntactic.add(token.toString());
 
-        syntactic.add(wrap(Nonterminal.UnaryOp));
+        syntactic.add(wrapNonterminal(Nonterminal.UnaryOp));
 
     }
 
@@ -631,7 +630,7 @@ public class SyntacticalAnalyser {
         for (ArrayList<Token> exp1 : expression.getTokens()) {
             handleUnaryExp(exp1);
 
-            syntactic.add(wrap(Nonterminal.MulExp));
+            syntactic.add(wrapNonterminal(Nonterminal.MulExp));
             if (j < expression.getSymbols().size()) {
                 syntactic.add(expression.getSymbols().get(j++).toString());
             }
@@ -644,7 +643,7 @@ public class SyntacticalAnalyser {
         for (ArrayList<Token> exp1 : expression.getTokens()) {
             handleMulExp(exp1);
 
-            syntactic.add(wrap(Nonterminal.AddExp));
+            syntactic.add(wrapNonterminal(Nonterminal.AddExp));
             if (j < expression.getSymbols().size()) {
                 syntactic.add(expression.getSymbols().get(j++).toString());
             }
@@ -655,7 +654,7 @@ public class SyntacticalAnalyser {
     public void handleConstExp(ArrayList<Token> exp) {
         handleAddExp(exp);
 
-        syntactic.add(wrap(Nonterminal.ConstExp));
+        syntactic.add(wrapNonterminal(Nonterminal.ConstExp));
     }
 
 
