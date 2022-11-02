@@ -576,6 +576,8 @@ public class SyntacticalAnalyser {
                     if (curToken.kind != Kind.SEMICN) {
                         handleError();
                     }
+                    moveForward();
+
                 }
         }
 
