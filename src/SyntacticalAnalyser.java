@@ -1,3 +1,5 @@
+import CodeGen.PCode;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.stream.Stream;
@@ -13,6 +15,7 @@ public class SyntacticalAnalyser {
     public boolean isCond = false;
     public static ArrayList<String> syntactic = new ArrayList<>();
     public static ArrayList<Token> forDebug = new ArrayList<>();
+    public static ArrayList<PCode> codes = new ArrayList<>();
 
     public static void wrapNonterminal(Nonterminal nonterminal) {
         syntactic.add("<" + nonterminal.toString() + ">");
