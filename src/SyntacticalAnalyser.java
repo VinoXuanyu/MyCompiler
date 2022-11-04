@@ -793,10 +793,11 @@ public class SyntacticalAnalyser {
         wrapNonterminal(Nonterminal.Exp);
     }
 
-    public void AddExpHandle() {
+    public int AddExpHandle() {
         // AddExp → MulExp | AddExp ('+' | '−') MulExp
+        int kindInt = 0;
 
-        MulExpHandle();
+        kindInt = MulExpHandle();
         while (curToken.kind == Kind.PLUS || curToken.kind == Kind.MINU) {
 
             // CodeGen
@@ -809,16 +810,19 @@ public class SyntacticalAnalyser {
 
             wrapNonterminal(Nonterminal.AddExp);
             moveForward();
-            MulExpHandle();
+            kindInt = MulExpHandle();
         }
 
         wrapNonterminal(Nonterminal.AddExp);
+
+        return kindInt;
     }
 
     public int MulExpHandle() {
         // UnaryExp | MulExp ('*' | '/' | '%') UnaryExp
         int kindInt = 0;
-        UnaryExpHandle();
+
+        kindInt = UnaryExpHandle();
         while (curToken.kind == Kind.MULT || curToken.kind == Kind.DIV || curToken.kind == Kind.MOD) {
 
             // CodeGen
@@ -833,7 +837,7 @@ public class SyntacticalAnalyser {
 
             wrapNonterminal(Nonterminal.MulExp);
             moveForward();
-            UnaryExpHandle();
+            kindInt = UnaryExpHandle();
         }
 
         wrapNonterminal(Nonterminal.MulExp);
