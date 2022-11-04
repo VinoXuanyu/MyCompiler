@@ -16,7 +16,7 @@ public class Compare {
                     System.out.println("Line: " + cur_line + " dont match");;
                     System.out.println("Correct: " + correct_line);
                     System.out.println("Custom: " + custom_line);
-                    System.out.println();
+                    break;
                 }
                 cur_line++;
             }

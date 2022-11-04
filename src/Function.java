@@ -1,12 +1,18 @@
 import java.util.ArrayList;
 
 public class Function {
-    public String content;
+    public String name;
     public String rType;
     public ArrayList<Integer> params;
 
-    public Function(Token token, String rType) {
-        this.content = token.content;
+    public Function(String name, String rType) {
+        this.name = name;
         this.rType = rType;
+    }
+
+    public Function(String name, String rType, ArrayList<Integer> params) {
+        this.name = name;
+        this.rType = rType;
+        this.params = params;
     }
 }

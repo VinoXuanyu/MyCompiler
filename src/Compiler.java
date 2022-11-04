@@ -1,8 +1,5 @@
 import CodeGen.VM;
 
-import java.awt.*;
-import java.io.File;
-import java.io.IOException;
 import java.util.Scanner;
 
 public class Compiler {
@@ -21,7 +18,7 @@ public class Compiler {
 
             fileHandler.PrintLines(SyntacticalAnalyser.syntactic);
 
-            VM vm = new VM(syntacticalAnalyser.codes, FileHandler.writer, scanner);
+            VM vm = new VM(syntacticalAnalyser.PCodes, FileHandler.writer, scanner);
             vm.run();
 
 

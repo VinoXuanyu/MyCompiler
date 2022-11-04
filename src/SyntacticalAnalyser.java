@@ -1,7 +1,8 @@
 import CodeGen.PCode;
+import CodeGen.PCodeKind;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.HashMap;
 import java.util.stream.Stream;
 
 public class SyntacticalAnalyser {
@@ -15,7 +16,37 @@ public class SyntacticalAnalyser {
     public boolean isCond = false;
     public static ArrayList<String> syntactic = new ArrayList<>();
     public static ArrayList<Token> forDebug = new ArrayList<>();
-    public static ArrayList<PCode> codes = new ArrayList<>();
+
+    public int scope = -1;
+    public int scopeID = -1;
+    public static ArrayList<PCode> PCodes = new ArrayList<>();
+    public HashMap<Integer, IdentifierMap> mapIdentifierGroup = new HashMap<>();
+    public HashMap<String, Function> mapFunction = new HashMap<>();
+
+    public void addScope() {
+        scopeID += 1;
+        scope += 1;
+        mapIdentifierGroup.put(scope, new IdentifierMap());
+    }
+
+    public void removeScope() {
+        mapIdentifierGroup.remove(scope);
+        scope -= 1;
+    }
+
+    public void addIdentifierToScope(Token token, String kind, int kindInt, int scopeID) {
+        mapIdentifierGroup.get(scopeID).put(kind, kindInt, token, scopeID);
+    }
+
+    public Identifier getIdentifier(Token token) {
+        Identifier identifier = null;
+        for (IdentifierMap identifierMap : mapIdentifierGroup.values()) {
+            if (identifierMap.has(token)) {
+                identifier = identifierMap.get(token);
+            }
+        }
+        return identifier;
+    }
 
     public static void wrapNonterminal(Nonterminal nonterminal) {
         syntactic.add("<" + nonterminal.toString() + ">");
@@ -60,6 +91,8 @@ public class SyntacticalAnalyser {
     public void CompUnitStart() {
         //CompUnit → {Decl} {FuncDef} MainFuncDef
 
+        addScope();
+
         while (p < tokens.size()) {
             if (curToken.kind == Kind.CONSTTK) {
                 DeclHandle();
@@ -79,6 +112,8 @@ public class SyntacticalAnalyser {
                 handleError();
             }
         }
+
+        removeScope();
 
         wrapNonterminal(Nonterminal.CompUnit);
     }
@@ -153,9 +188,20 @@ public class SyntacticalAnalyser {
         if (curToken.kind != Kind.IDENFR) {
             handleError();
         }
+
+        // CodeGen
+        Token identifier = curToken;
+        int kindInt = 0;
+        PCodes.add(new PCode(PCodeKind.VAR, scopeID + "-" + curToken.content));
+        // CodeGen
+
         moveForward();
 
         if (curToken.kind == Kind.LBRACK) {
+            // CodeGen
+            kindInt += 1;
+            // CodeGen
+
             moveForward();
 
             ConstExpHandle();
@@ -166,6 +212,10 @@ public class SyntacticalAnalyser {
             moveForward();
 
             if (curToken.kind == Kind.LBRACK) {
+                //CodeGen//
+                kindInt += 1;
+                //CodeGen//
+
                 moveForward();
                 ConstExpHandle();
 
@@ -175,6 +225,15 @@ public class SyntacticalAnalyser {
                 moveForward();
             }
         }
+
+        // CodeGen
+        if (kindInt > 0) {
+            PCodes.add(new PCode(PCodeKind.DIMVAR, scopeID + "-" + identifier.content, kindInt));
+        }
+        addIdentifierToScope(identifier, "const", kindInt, scopeID);
+        // CodeGen
+
+
         if (curToken.kind == Kind.ASSIGN) {
             moveForward();
             ConstInitValHandle();
@@ -189,12 +248,23 @@ public class SyntacticalAnalyser {
         // VarDef → Ident { '[' ConstExp ']' }
         //          | Ident { '[' ConstExp ']' } '=' InitVal
 
+        // CodeGen
+        Token identifier = curToken;
+        PCodes.add(new PCode(PCodeKind.VAR, scopeID + "-" + identifier.content));
+
+        int kindInt = 0;
+        // CodeGen
+
         if (curToken.kind != Kind.IDENFR) {
             handleError();
         }
         moveForward();
 
         if (curToken.kind == Kind.LBRACK) {
+            // CodeGen
+            kindInt += 1;
+            // CodeGen
+
             moveForward();
             ConstExpHandle();
 
@@ -204,6 +274,10 @@ public class SyntacticalAnalyser {
             moveForward();
 
             if (curToken.kind == Kind.LBRACK) {
+                // CodeGen
+                kindInt += 1;
+                // CodeGen
+
                 moveForward();
                 ConstExpHandle();
 
@@ -215,9 +289,20 @@ public class SyntacticalAnalyser {
             }
         }
 
+        // CodeGen
+        if (kindInt > 0) {
+            PCodes.add(new PCode(PCodeKind.DIMVAR, scopeID + "-" + identifier.content, kindInt));
+        }
+        addIdentifierToScope(identifier, "var", kindInt, scopeID);
+        // CodeGen
+
         if (curToken.kind == Kind.ASSIGN) {
             moveForward();
             InitValHandle();
+        } else {
+            // CodeGen
+            PCodes.add(new PCode(PCodeKind.PLACEHOLDER, scopeID + "-" + identifier.content, kindInt));
+            // Codegen
         }
 
         wrapNonterminal(Nonterminal.VarDef);
@@ -254,6 +339,13 @@ public class SyntacticalAnalyser {
     public void MainFuncDefHandle() {
         // MainFuncDef -> 'int' 'main' '(' ')' Block
 
+        // CodeGen
+        Function function = new Function("main", "int", new ArrayList<>());
+        mapFunction.put("main", function);
+
+        PCodes.add(new PCode(PCodeKind.MAIN, "main"));
+        // CodeGen
+
         if (curToken.kind != Kind.INTTK) {
             handleError();
         }
@@ -274,15 +366,25 @@ public class SyntacticalAnalyser {
         }
         moveForward();
 
-        BlockHandle();
+        BlockHandle(false);
 
         wrapNonterminal(Nonterminal.MainFuncDef);
+
+        // CodeGen
+        PCodes.add(new PCode(PCodeKind.EXIT));
+        // CodeGen
     }
 
     public void FuncDefHandle() {
+        // FuncDef → FuncType Ident '(' [FuncFParams] ')' Block
 
+        // CodeGen
+        addScope();
 
-        FuncTypeHandle();
+        String rType = FuncTypeHandle();
+        String funcName = curToken.content;
+        ArrayList<Integer> params;
+        // CodeGen
 
         if (curToken.kind != Kind.IDENFR) {
             handleError();
@@ -296,36 +398,67 @@ public class SyntacticalAnalyser {
 
         if (curToken.kind == Kind.RPARENT) {
             moveForward();
-            BlockHandle();
+
+            // CodeGen
+            params = new ArrayList<>();
+            // CodeGen
+
         } else {
-            FuncFParamsHandle();
+
+            // CodeGen
+            params = FuncFParamsHandle();
+            // CodeGen
 
             if (curToken.kind != Kind.RPARENT) {
                 handleError();
             }
             moveForward();
-
-            BlockHandle();
         }
+        BlockHandle(true);
 
         wrapNonterminal(Nonterminal.FuncDef);
+
+        // CodeGen
+        Function function = new Function(funcName, rType, params);
+        mapFunction.put(function.name, function);
+
+        PCodes.add(new PCode(PCodeKind.FUNC, function.name, function.params.size()));
+        PCodes.add(new PCode(PCodeKind.RET, 0));
+        PCodes.add(new PCode(PCodeKind.ENDFUNC));
+
+        removeScope();
+        // CodeGen
+
     }
 
-    public void FuncTypeHandle() {
+    public String FuncTypeHandle() {
         // FuncType -> 'void' | 'int'
-
+        String rType;
         if (!(curToken.kind == Kind.VOIDTK || curToken.kind == Kind.INTTK)) {
+            rType = "";
             handleError();
+        } else if (curToken.kind == Kind.VOIDTK) {
+            rType = "void";
+        } else {
+            rType = "int";
         }
+
         moveForward();
 
         wrapNonterminal(Nonterminal.FuncType);
+
+        return rType;
     }
 
-    public void FuncFParamHandle() {
+    public int FuncFParamHandle() {
         // FuncFParam -> BType Ident ['['']' {'[' ConstExp ']' }]
 
         BTypeHandle();
+
+        // CodeGen
+        int paramType = 0;
+        Token identifier = curToken;
+        // CodeGen
 
         if (curToken.kind != Kind.IDENFR) {
             handleError();
@@ -333,6 +466,10 @@ public class SyntacticalAnalyser {
         moveForward();
 
         if (curToken.kind == Kind.LBRACK) {
+            // CodeGen
+            paramType += 1;
+            // CodeGen
+
             moveForward();
 
             if (curToken.kind != Kind.RBRACK) {
@@ -341,6 +478,10 @@ public class SyntacticalAnalyser {
             moveForward();
 
             if (curToken.kind == Kind.LBRACK) {
+                // CodeGen
+                paramType += 1;
+                // CodeGen
+
                 moveForward();
                 ConstExpHandle();
 
@@ -352,18 +493,32 @@ public class SyntacticalAnalyser {
         }
 
         wrapNonterminal(Nonterminal.FuncFParam);
+
+        // CodeGen
+        PCodes.add(new PCode(PCodeKind.PARA, scopeID + "-" + identifier.content, paramType));
+        addIdentifierToScope(identifier, "para", paramType, scopeID);
+        return paramType;
     }
 
-    public void FuncFParamsHandle() {
+    public ArrayList<Integer> FuncFParamsHandle() {
         // FuncFParams -> FuncFParam {',' FuncFParam}
 
-        FuncFParamHandle();
+        // CodeGen
+        ArrayList<Integer> params = new ArrayList<>();
+        params.add(FuncFParamHandle());
+        // CodeGen
+
         while (curToken.kind == Kind.COMMA) {
             moveForward();
-            FuncFParamHandle();
+
+            // CodeGen
+            params.add(FuncFParamHandle());
+            // CodeGen
         }
 
         wrapNonterminal(Nonterminal.FuncFParams);
+
+        return params;
     }
 
     public void FuncRParamsHandle() {
@@ -377,8 +532,14 @@ public class SyntacticalAnalyser {
 
         wrapNonterminal(Nonterminal.FuncRParams);
     }
-    public void BlockHandle() {
+    public void BlockHandle(boolean inFunc) {
         // '{' { BlockItem } '}'
+
+        // CodeGen
+        if (!inFunc) {
+            addScope();
+        }
+        //Code Gen //
 
         if (curToken.kind != Kind.LBRACE) {
             handleError();
@@ -388,10 +549,15 @@ public class SyntacticalAnalyser {
         while (curToken.kind != Kind.RBRACE) {
             BlockItemHandle();
         }
-
         moveForward();
 
         wrapNonterminal(Nonterminal.Block);
+
+        // CodeGen
+        if (!inFunc) {
+            removeScope();
+        }
+        //Code Gen //
     }
 
     public void BlockItemHandle() {
@@ -474,6 +640,10 @@ public class SyntacticalAnalyser {
 
                 if (curToken.kind == Kind.SEMICN) {
                     moveForward();
+
+                    // CodeGen
+                    PCodes.add(new PCode(PCodeKind.RET, 0));
+                    // CodeGen
                 } else {
                     ExpHandle();
 
@@ -481,10 +651,15 @@ public class SyntacticalAnalyser {
                         handleError();
                     }
                     moveForward();
+
+                    // CodeGen
+                    PCodes.add(new PCode(PCodeKind.RET, 0));
+                    // CodeGen
                 }
                 break;
 
             case PRINTFTK:
+                int paramCount = 0;
                 moveForward();
 
                 if (curToken.kind != Kind.LPARENT) {
@@ -492,15 +667,20 @@ public class SyntacticalAnalyser {
                 }
                 moveForward();
 
+                // CodeGen
+                Token strcon = curToken;
+                // Codegen
+
                 if (curToken.kind != Kind.STRCON) {
                     handleError();
                 }
                 moveForward();
 
+
                 while (curToken.kind == Kind.COMMA) {
                     moveForward();
                     ExpHandle();
-
+                    paramCount += 1;
                 }
 
                 if (curToken.kind != Kind.RPARENT) {
@@ -512,10 +692,15 @@ public class SyntacticalAnalyser {
                     handleError();
                 }
                 moveForward();
+
+                // CodeGen
+                PCodes.add(new PCode(PCodeKind.PRINT, strcon.content, paramCount));
+                // CodeGen
+
                 break;
 
             case LBRACE:
-                BlockHandle();
+                BlockHandle(false);
                 break;
 
             case IDENFR:
@@ -535,7 +720,12 @@ public class SyntacticalAnalyser {
                     }
                     moveForward();
                 } else {
-                    LValHandle();
+                    // CodeGen
+                    Token identifier = curToken;
+
+                    int kindInt = LValHandle();
+                    PCodes.add(new PCode(PCodeKind.ADDRESS, getIdentifier(identifier).scope + "-" + identifier.content, kindInt));
+                    // CodeGen
 
                     if (curToken.kind != Kind.ASSIGN) {
                         handleError();
@@ -544,6 +734,10 @@ public class SyntacticalAnalyser {
 
                     if (curToken.kind == Kind.GETINTTK) {
                         moveForward();
+
+                        // CodeGen
+                        PCodes.add(new PCode(PCodeKind.GETINT));
+                        // CodeGen
 
                         if (curToken.kind != Kind.LPARENT) {
                             handleError();
@@ -567,6 +761,9 @@ public class SyntacticalAnalyser {
                         }
                         moveForward();
                     }
+
+                    // CodeGen
+                    PCodes.add(new PCode(PCodeKind.POP, getIdentifier(identifier).scope + "-" + identifier.content));
                 }
 
                 break;
@@ -601,6 +798,15 @@ public class SyntacticalAnalyser {
 
         MulExpHandle();
         while (curToken.kind == Kind.PLUS || curToken.kind == Kind.MINU) {
+
+            // CodeGen
+            if (curToken.kind == Kind.PLUS) {
+                PCodes.add(new PCode(PCodeKind.ADD));
+            } else {
+                PCodes.add(new PCode(PCodeKind.SUB));
+            }
+            // CodeGen
+
             wrapNonterminal(Nonterminal.AddExp);
             moveForward();
             MulExpHandle();
@@ -609,17 +815,30 @@ public class SyntacticalAnalyser {
         wrapNonterminal(Nonterminal.AddExp);
     }
 
-    public void MulExpHandle() {
+    public int MulExpHandle() {
         // UnaryExp | MulExp ('*' | '/' | '%') UnaryExp
-
+        int kindInt = 0;
         UnaryExpHandle();
         while (curToken.kind == Kind.MULT || curToken.kind == Kind.DIV || curToken.kind == Kind.MOD) {
+
+            // CodeGen
+            if (curToken.kind == Kind.MULT) {
+                PCodes.add(new PCode(PCodeKind.MUL));
+            } else if (curToken.kind == Kind.DIV) {
+                PCodes.add(new PCode(PCodeKind.DIV);
+            } else {
+                PCodes.add(new PCode(PCodeKind.MAIN));
+            }
+            //CodeGen
+
             wrapNonterminal(Nonterminal.MulExp);
             moveForward();
             UnaryExpHandle();
         }
 
         wrapNonterminal(Nonterminal.MulExp);
+
+        return kindInt;
     }
 
     public void RelExpHandle() {
@@ -682,12 +901,15 @@ public class SyntacticalAnalyser {
         wrapNonterminal(Nonterminal.Cond);
     }
 
-    public void UnaryExpHandle() {
+    public int UnaryExpHandle() {
         // UnaryExp → PrimaryExp
         //          | Ident '(' [FuncRParams] ')'
         //          | UnaryOp UnaryExp
 
+        int kindInt = 0;
+
         if (curToken.kind == Kind.IDENFR) {
+            Token identifier = curToken;
             if (lookAhead(OneStep) == Kind.LPARENT) {
                 moveForward();
 
@@ -705,23 +927,43 @@ public class SyntacticalAnalyser {
                     }
                     moveForward();
                 }
+
+                // CodeGen
+                PCodes.add(new PCode(PCodeKind.CALL, identifier.content));
+                if (mapFunction.containsKey(identifier.content) && mapFunction.get(identifier.content).rType.equals("void")) {
+                    kindInt = -1;
+                }
+                // CodeGen
+
             } else {
-                PrimaryExpHandle();
+                kindInt = PrimaryExpHandle();
             }
 
         } else if (curToken.kind == Kind.LPARENT || curToken.kind == Kind.INTCON) {
-            PrimaryExpHandle();
+            kindInt = PrimaryExpHandle();
         } else {
             UnaryOpHandle();
             UnaryExpHandle();
         }
 
         wrapNonterminal(Nonterminal.UnaryExp);
+
+        return kindInt;
     }
 
     public void UnaryOpHandle() {
         // UnaryOp → '+' | '−' | '!'
         // '!' Only in CondExp
+
+        // CodeGen
+        if (curToken.kind == Kind.PLUS) {
+            PCodes.add(new PCode(PCodeKind.POS));
+        } else if (curToken.kind == Kind.MINU) {
+            PCodes.add(new PCode(PCodeKind.NEG));
+        } else {
+            PCodes.add(new PCode(PCodeKind.NOT));
+        }
+        // CodeGen
 
         if (curToken.kind == Kind.PLUS || curToken.kind == Kind.MINU) {
             moveForward();
@@ -734,11 +976,11 @@ public class SyntacticalAnalyser {
         wrapNonterminal(Nonterminal.UnaryOp);
     }
 
-    public void PrimaryExpHandle() {
+    public int PrimaryExpHandle() {
         // PrimaryExp -> '(' Exp ')'
         //              | LVal
         //              | Number
-
+        int kindInt = 0;
         if (curToken.kind == Kind.LPARENT) {
             moveForward();
             ExpHandle();
@@ -750,15 +992,29 @@ public class SyntacticalAnalyser {
         } else if (curToken.kind == Kind.INTCON) {
             NumberHandle();
         } else if (curToken.kind == Kind.IDENFR) {
-            LValHandle();
+            // CodeGen
+            Token identifier = curToken;
+            kindInt = LValHandle();
+            if (kindInt == 0) {
+                PCodes.add(new PCode(PCodeKind.VALUE, getIdentifier(identifier).scope + "-" + identifier.content));
+            } else {
+                PCodes.add(new PCode(PCodeKind.ADDRESS, getIdentifier(identifier).scope + "-" + identifier.content));
+            }
+            // CodeGen
         } else {
             handleError();
         }
 
         wrapNonterminal(Nonterminal.PrimaryExp);
+
+        return kindInt;
     }
 
     public void NumberHandle() {
+        // CodeGen
+        PCodes.add(new PCode(PCodeKind.PUSH, Integer.parseInt(curToken.content)));
+        // CodeGen
+
         if (curToken.kind != Kind.INTCON) {
             handleError();
         }
@@ -767,8 +1023,14 @@ public class SyntacticalAnalyser {
         wrapNonterminal(Nonterminal.Number);
     }
 
-    public void LValHandle() {
+    public int LValHandle() {
         // LVal -> Ident {'[' Exp ']'}
+
+        // CodeGen
+        int kindInt = 0;
+        Token identifier = curToken;
+        PCodes.add(new PCode(PCodeKind.PUSH, getIdentifier(identifier).scope + "-" + identifier.content));
+        // CodeGen
 
         if (curToken.kind == Kind.IDENFR) {
             moveForward();
@@ -794,6 +1056,7 @@ public class SyntacticalAnalyser {
         }
 
         wrapNonterminal(Nonterminal.LVal);
+        return 0;
     }
 
     public void ConstExpHandle() {

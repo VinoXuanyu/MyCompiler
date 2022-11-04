@@ -1,9 +1,9 @@
 package CodeGen;
 
 public class PCode {
-    private PCodeKind kind;
-    private Object val1 = null;
-    private Object val2 = null;
+    public PCodeKind kind;
+    public Object val1 = null;
+    public Object val2 = null;
 
     public PCode(PCodeKind kind) {
         this.kind = kind;

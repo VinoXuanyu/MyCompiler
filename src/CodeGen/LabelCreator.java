@@ -1,6 +1,6 @@
 package CodeGen;
 
-public class Label {
+public class LabelCreator {
     public int num = 0;
 
     public String getLabel(String kind) {
