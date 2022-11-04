@@ -825,7 +825,7 @@ public class SyntacticalAnalyser {
             if (curToken.kind == Kind.MULT) {
                 PCodes.add(new PCode(PCodeKind.MUL));
             } else if (curToken.kind == Kind.DIV) {
-                PCodes.add(new PCode(PCodeKind.DIV);
+                PCodes.add(new PCode(PCodeKind.DIV));
             } else {
                 PCodes.add(new PCode(PCodeKind.MAIN));
             }
