@@ -16,7 +16,7 @@ public class Compare {
                     System.out.println("Line: " + cur_line + " dont match");;
                     System.out.println("Correct: " + correct_line);
                     System.out.println("Custom: " + custom_line);
-                    break;
+//                    break;
                 }
                 cur_line++;
             }
@@ -36,7 +36,9 @@ public class Compare {
     }
 
     public static void main(String[] args) throws IOException {
-        Compiler.main(new String[]{});
-        Compare("output.txt", "correct.txt");
+//        Compiler.main(new String[]{});
+//        Compare("output.txt", "correct.txt");
+//        Compare("pcoderesult.txt", "correct.txt");
+        Compare("pcodes.txt", "correct_pcodes.txt");
     }
 }

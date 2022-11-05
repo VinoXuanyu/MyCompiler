@@ -130,12 +130,22 @@ public class LexicalAnalyser {
     public void parseQuote() {
         Character c = null;
         StringBuilder builder = new StringBuilder("");
+        boolean metSlash = false;
         while ((c = moveForward()) != null) {
             if (c == '"') {
                 tokens.add(new Token(Kind.STRCON, "\"" + builder + "\"", line));
                 return;
             } else {
-                builder.append(c);
+                if (c == '\\') {
+                    metSlash = true;
+                } else {
+                    if (metSlash && c == 'n') {
+                        builder.append("\n");
+                    } else {
+                        builder.append(c);
+                    }
+                    metSlash = false;
+                }
             }
         }
     }

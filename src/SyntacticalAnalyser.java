@@ -668,7 +668,7 @@ public class SyntacticalAnalyser {
                 moveForward();
 
                 // CodeGen
-                Token strcon = curToken;
+                Token str = curToken;
                 // Codegen
 
                 if (curToken.kind != Kind.STRCON) {
@@ -694,7 +694,7 @@ public class SyntacticalAnalyser {
                 moveForward();
 
                 // CodeGen
-                PCodes.add(new PCode(PCodeKind.PRINT, strcon.content, paramCount));
+                PCodes.add(new PCode(PCodeKind.PRINT, str.content, paramCount));
                 // CodeGen
 
                 break;
@@ -799,18 +799,19 @@ public class SyntacticalAnalyser {
 
         kindInt = MulExpHandle();
         while (curToken.kind == Kind.PLUS || curToken.kind == Kind.MINU) {
+            Kind kind = curToken.kind;
+
+            wrapNonterminal(Nonterminal.AddExp);
+            moveForward();
+            kindInt = MulExpHandle();
 
             // CodeGen
-            if (curToken.kind == Kind.PLUS) {
+            if (kind == Kind.PLUS) {
                 PCodes.add(new PCode(PCodeKind.ADD));
             } else {
                 PCodes.add(new PCode(PCodeKind.SUB));
             }
             // CodeGen
-
-            wrapNonterminal(Nonterminal.AddExp);
-            moveForward();
-            kindInt = MulExpHandle();
         }
 
         wrapNonterminal(Nonterminal.AddExp);
@@ -824,20 +825,20 @@ public class SyntacticalAnalyser {
 
         kindInt = UnaryExpHandle();
         while (curToken.kind == Kind.MULT || curToken.kind == Kind.DIV || curToken.kind == Kind.MOD) {
-
-            // CodeGen
-            if (curToken.kind == Kind.MULT) {
-                PCodes.add(new PCode(PCodeKind.MUL));
-            } else if (curToken.kind == Kind.DIV) {
-                PCodes.add(new PCode(PCodeKind.DIV));
-            } else {
-                PCodes.add(new PCode(PCodeKind.MAIN));
-            }
-            //CodeGen
-
+            Kind kind = curToken.kind;
             wrapNonterminal(Nonterminal.MulExp);
             moveForward();
             kindInt = UnaryExpHandle();
+
+            // CodeGen
+            if (kind == Kind.MULT) {
+                PCodes.add(new PCode(PCodeKind.MUL));
+            } else if (kind == Kind.DIV) {
+                PCodes.add(new PCode(PCodeKind.DIV));
+            } else {
+                PCodes.add(new PCode(PCodeKind.MOD));
+            }
+            //CodeGen
         }
 
         wrapNonterminal(Nonterminal.MulExp);
@@ -946,8 +947,20 @@ public class SyntacticalAnalyser {
         } else if (curToken.kind == Kind.LPARENT || curToken.kind == Kind.INTCON) {
             kindInt = PrimaryExpHandle();
         } else {
+            Kind kind = curToken.kind;
             UnaryOpHandle();
             UnaryExpHandle();
+
+            // CodeGen
+            if (kind == Kind.PLUS) {
+                PCodes.add(new PCode(PCodeKind.POS));
+            } else if (kind == Kind.MINU) {
+                PCodes.add(new PCode(PCodeKind.NEG));
+            } else {
+                PCodes.add(new PCode(PCodeKind.NOT));
+            }
+            // CodeGen
+
         }
 
         wrapNonterminal(Nonterminal.UnaryExp);
@@ -958,16 +971,6 @@ public class SyntacticalAnalyser {
     public void UnaryOpHandle() {
         // UnaryOp → '+' | '−' | '!'
         // '!' Only in CondExp
-
-        // CodeGen
-        if (curToken.kind == Kind.PLUS) {
-            PCodes.add(new PCode(PCodeKind.POS));
-        } else if (curToken.kind == Kind.MINU) {
-            PCodes.add(new PCode(PCodeKind.NEG));
-        } else {
-            PCodes.add(new PCode(PCodeKind.NOT));
-        }
-        // CodeGen
 
         if (curToken.kind == Kind.PLUS || curToken.kind == Kind.MINU) {
             moveForward();
@@ -996,15 +999,17 @@ public class SyntacticalAnalyser {
         } else if (curToken.kind == Kind.INTCON) {
             NumberHandle();
         } else if (curToken.kind == Kind.IDENFR) {
+
             // CodeGen
             Token identifier = curToken;
             kindInt = LValHandle();
             if (kindInt == 0) {
-                PCodes.add(new PCode(PCodeKind.VALUE, getIdentifier(identifier).scope + "-" + identifier.content));
+                PCodes.add(new PCode(PCodeKind.VALUE, getIdentifier(identifier).scope + "-" + identifier.content, kindInt));
             } else {
-                PCodes.add(new PCode(PCodeKind.ADDRESS, getIdentifier(identifier).scope + "-" + identifier.content));
+                PCodes.add(new PCode(PCodeKind.ADDRESS, getIdentifier(identifier).scope + "-" + identifier.content, kindInt));
             }
             // CodeGen
+
         } else {
             handleError();
         }
