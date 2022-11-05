@@ -35,7 +35,7 @@ public class SyntacticalAnalyser {
     }
 
     public void addIdentifierToScope(Token token, String kind, int kindInt, int scopeID) {
-        mapIdentifierGroup.get(scopeID).put(kind, kindInt, token, scopeID);
+        mapIdentifierGroup.get(scope).put(kind, kindInt, token, scopeID);
     }
 
     public Identifier getIdentifier(Token token) {
@@ -383,7 +383,11 @@ public class SyntacticalAnalyser {
 
         String rType = FuncTypeHandle();
         String funcName = curToken.content;
-        ArrayList<Integer> params;
+
+        PCode code = new PCode(PCodeKind.FUNC, funcName);
+        Function function = new Function(funcName, rType);
+        PCodes.add(code);
+
         // CodeGen
 
         if (curToken.kind != Kind.IDENFR) {
@@ -400,13 +404,13 @@ public class SyntacticalAnalyser {
             moveForward();
 
             // CodeGen
-            params = new ArrayList<>();
+            function.params = new ArrayList<>();
             // CodeGen
 
         } else {
 
             // CodeGen
-            params = FuncFParamsHandle();
+            function.params = FuncFParamsHandle();
             // CodeGen
 
             if (curToken.kind != Kind.RPARENT) {
@@ -419,10 +423,8 @@ public class SyntacticalAnalyser {
         wrapNonterminal(Nonterminal.FuncDef);
 
         // CodeGen
-        Function function = new Function(funcName, rType, params);
         mapFunction.put(function.name, function);
-
-        PCodes.add(new PCode(PCodeKind.FUNC, function.name, function.params.size()));
+        code.val2 = function.params.size();
         PCodes.add(new PCode(PCodeKind.RET, 0));
         PCodes.add(new PCode(PCodeKind.ENDFUNC));
 
@@ -524,10 +526,18 @@ public class SyntacticalAnalyser {
     public void FuncRParamsHandle() {
         // FuncRParams → Exp { ',' Exp }
 
-        ExpHandle();
+        // CodeGen
+        int kind = ExpHandle();
+        PCodes.add(new PCode(PCodeKind.RPARA, kind));
+        // CodeGen
+
         while (curToken.kind == Kind.COMMA) {
             moveForward();
-            ExpHandle();
+
+            // CodeGen
+            kind = ExpHandle();
+            PCodes.add(new PCode(PCodeKind.RPARA, kind));
+            // CodeGen
         }
 
         wrapNonterminal(Nonterminal.FuncRParams);
@@ -653,7 +663,7 @@ public class SyntacticalAnalyser {
                     moveForward();
 
                     // CodeGen
-                    PCodes.add(new PCode(PCodeKind.RET, 0));
+                    PCodes.add(new PCode(PCodeKind.RET, 1));
                     // CodeGen
                 }
                 break;
@@ -785,12 +795,14 @@ public class SyntacticalAnalyser {
 
     }
 
-    public void ExpHandle() {
+    public int ExpHandle() {
         // Exp → AddExp
 
-        AddExpHandle();
+        int kind = AddExpHandle();
 
         wrapNonterminal(Nonterminal.Exp);
+
+        return kind;
     }
 
     public int AddExpHandle() {

@@ -1,0 +1,22 @@
+FUNC @fun:
+PARA 1-x, 0
+PARA 1-y, 0
+PUSH 1-x
+VALUE 1-x, 0
+PUSH 1-y
+VALUE 1-y, 0
+ADD 
+RET 1
+RET 0
+ENDFUNC 
+MAIN main
+VAR 2-a
+PUSH 1
+RPARA 0
+PUSH 2
+RPARA 0
+$fun
+PUSH 2-a
+VALUE 2-a, 0
+PRINT "%d"
+EXIT 

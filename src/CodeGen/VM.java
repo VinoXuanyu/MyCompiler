@@ -165,7 +165,7 @@ public class VM {
                 case PARA : {
                     Variable param = new Variable(realParams.get(realParams.size() - callArgsCount + nowArgsCount));
                     int n = (int) code.val2;
-                    param.dimensions = 2;
+                    param.dimensions = n;
                     if (n == 2) {
                         param.secondDim = pop();
                     }
