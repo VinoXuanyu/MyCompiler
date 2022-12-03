@@ -58,4 +58,39 @@ public class Token {
                 || kind == Kind.MINU
                 || kind == Kind.NOT;
     }
+
+    public int formatParamCount() {
+        int count = 0;
+        for (int i = 0; i < content.length() - 1; i++) {
+            if (content.charAt(i) == '%' && content.charAt(i + 1) == 'd') {
+                count += 1;
+            }
+        }
+
+        return count;
+    }
+
+    private boolean isLegalChar(char ch) {
+        return ch == 32 ||
+                ch == 33 ||
+                (ch >= 40 && ch <= 126);
+    }
+
+    public boolean isLegalFormatString() {
+        for (int i = 1; i < content.length() - 1; i++) {
+            char ch = content.charAt(i);
+            if (isLegalChar(ch)) {
+                if (ch == '\\' && content.charAt(i + 1) != 'n') {
+                    return false;
+                }
+            } else {
+                if (ch == '%' && content.charAt(i + 1) == 'd') {
+                    continue;
+                }
+                return false;
+            }
+        }
+
+        return true;
+    }
 }

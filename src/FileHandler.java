@@ -45,6 +45,14 @@ public class FileHandler {
         testWriter.close();
     }
 
+    public void printErrors(ArrayList<Error> lines) throws IOException {
+        for (Error err : lines) {
+            testWriter.write(err.toString() + "\n");
+        }
+        testWriter.flush();
+        testWriter.close();
+    }
+
     public void printRaw(ArrayList<String> lines) throws IOException {
         for (String str : lines) {
             writer.write(str);

@@ -29,7 +29,7 @@ public class Compare {
                 System.out.println("Custom has redundant lines, should be: " + cur_line);
             }
 
-            System.out.println("Two files are identical");
+            System.out.println("Two files are identical, Total: " + cur_line);
 
         }
 
@@ -39,6 +39,6 @@ public class Compare {
 //        Compiler.main(new String[]{});
 //        Compare("output.txt", "correct.txt");
 //        Compare("pcoderesult.txt", "correct.txt");
-        Compare("pcodes.txt", "correct_pcodes.txt");
+        Compare("errors.txt", "correct.txt");
     }
 }
