@@ -97,16 +97,17 @@ public class SyntacticalAnalyser {
         CompUnitStart();
     }
 
-    public void handleError(int line, ErrorKind kind) {
+    public void handleError (int line, ErrorKind kind) {
         // Error Handle
         Error err = new Error(line, MapErr2Kind.Kind(kind));
-        System.out.println(err);
         errors.add(err);
     }
 
     public void handleError() {
+        System.out.println("Error at " + curToken.content + " " + curToken.line);
         RuntimeException e = new RuntimeException("handle err");
         Stream.of(e.getStackTrace()).forEach(System.out::println);
+
         System.exit(-1);
     }
 
@@ -131,6 +132,9 @@ public class SyntacticalAnalyser {
         }
     }
 
+    public Token prevToken() {
+        return tokens.get(p - 1);
+    }
 
     public void CompUnitStart() {
         //CompUnit → {Decl} {FuncDef} MainFuncDef
@@ -190,7 +194,7 @@ public class SyntacticalAnalyser {
         }
 
         if (curToken.kind != Kind.SEMICN) {
-            handleError(curToken.line, ErrorKind.MissSemiColon);
+            handleError(prevToken().line, ErrorKind.MissSemiColon);
         } else {
             moveForward();
         }
@@ -210,7 +214,7 @@ public class SyntacticalAnalyser {
         }
 
         if (curToken.kind != Kind.SEMICN) {
-            handleError(curToken.line, ErrorKind.MissSemiColon);
+            handleError(prevToken().line, ErrorKind.MissSemiColon);
         } else {
             moveForward();
         }
@@ -222,9 +226,10 @@ public class SyntacticalAnalyser {
         // BType → 'int'
 
         if (curToken.kind != Kind.INTTK) {
-            handleError();
+//            handleError();
+        } else {
+            moveForward();
         }
-        moveForward();
 
     }
 
@@ -261,7 +266,7 @@ public class SyntacticalAnalyser {
 
             // Error Handle
             if (curToken.kind != Kind.RBRACK) {
-                handleError(curToken.line, ErrorKind.MissBracket);
+                handleError(prevToken().line, ErrorKind.MissBrack);
             } else {
                 moveForward();
             }
@@ -277,7 +282,7 @@ public class SyntacticalAnalyser {
 
                 // Error Handle
                 if (curToken.kind != Kind.RBRACK) {
-                    handleError(curToken.line, ErrorKind.MissBracket);
+                    handleError(prevToken().line, ErrorKind.MissBrack);
                 } else {
                     moveForward();
                 }
@@ -334,7 +339,7 @@ public class SyntacticalAnalyser {
             ConstExpHandle();
 
             if (curToken.kind != Kind.RBRACK) {
-                handleError(curToken.line, ErrorKind.MissBracket);
+                handleError(prevToken().line, ErrorKind.MissBrack);
             } else {
                 moveForward();
             }
@@ -348,7 +353,7 @@ public class SyntacticalAnalyser {
                 ConstExpHandle();
 
                 if (curToken.kind != Kind.RBRACK) {
-                    handleError(curToken.line, ErrorKind.MissBracket);
+                    handleError(prevToken().line, ErrorKind.MissBrack);
                 } else {
                     moveForward();
                 }
@@ -436,7 +441,7 @@ public class SyntacticalAnalyser {
         moveForward();
 
         if (curToken.kind != Kind.RPARENT) {
-            handleError(curToken.line, ErrorKind.MissParenthesis);
+            handleError(prevToken().line, ErrorKind.MissParenthesis);
         } else {
             moveForward();
         }
@@ -445,7 +450,7 @@ public class SyntacticalAnalyser {
         needReturn = true;
         boolean returned = BlockHandle(false);
         if (!returned) {
-            handleError(curToken.line, ErrorKind.MissReturn);
+            handleError(prevToken().line, ErrorKind.MissReturn);
         }
         // Error Handle
 
@@ -487,25 +492,27 @@ public class SyntacticalAnalyser {
         }
         moveForward();
 
-        if (curToken.kind == Kind.RPARENT) {
-            moveForward();
 
-            // CodeGen
-            function.params = new ArrayList<>();
-            // CodeGen
-
-        } else {
-
+        if (curToken.kind != Kind.RPARENT) {
             // CodeGen
             function.params = FuncFParamsHandle();
             // CodeGen
 
-            if (curToken.kind != Kind.RPARENT) {
-                handleError(curToken.line, ErrorKind.MissParenthesis);
-            } else {
-                moveForward();
-            }
+        } else{
+            // CodeGen
+            function.params = new ArrayList<>();
+            // CodeGen
         }
+
+        if (curToken.kind != Kind.RPARENT) {
+            handleError(prevToken().line, ErrorKind.MissParenthesis);
+        } else {
+            moveForward();
+        }
+
+
+
+
         boolean returned = BlockHandle(true);
 
         // CodeGen
@@ -556,15 +563,16 @@ public class SyntacticalAnalyser {
         // CodeGen
 
         // Error Handle
-        if (functionDefined(identifier)) {
+        if (identifierDefinedInScope(identifier)) {
             handleError(curToken.line, ErrorKind.Redefinition);
         }
         //  Error Handle
 
         if (curToken.kind != Kind.IDENFR) {
-            handleError();
+//            handleError();
+        } else {
+            moveForward();
         }
-        moveForward();
 
         if (curToken.kind == Kind.LBRACK) {
             // CodeGen
@@ -574,7 +582,7 @@ public class SyntacticalAnalyser {
             moveForward();
 
             if (curToken.kind != Kind.RBRACK) {
-                handleError(curToken.line, ErrorKind.MissBracket);
+                handleError(prevToken().line, ErrorKind.MissBrack);
             } else {
                 moveForward();
             }
@@ -588,7 +596,7 @@ public class SyntacticalAnalyser {
                 ConstExpHandle();
 
                 if (curToken.kind != Kind.RBRACK) {
-                    handleError(curToken.line, ErrorKind.MissBracket);
+                    handleError(prevToken().line, ErrorKind.MissBrack);
                 } else {
                     moveForward();
                 }
@@ -598,7 +606,7 @@ public class SyntacticalAnalyser {
         wrapNonterminal(Nonterminal.FuncFParam);
 
         // CodeGen
-        PCodes.add(new PCode(PCodeKind.PARA, scopeID + "-" + identifier.content, paramType));
+//        PCodes.add(new PCode(PCodeKind.PARA, scopeID + "-" + identifier.content, paramType));
         addIdentifierToScope(identifier, "para", paramType);
         return paramType;
     }
@@ -626,6 +634,10 @@ public class SyntacticalAnalyser {
 
     public void FuncRParamsHandle(Token identifier) {
         // FuncRParams → Exp { ',' Exp }
+
+        if (curToken.kind == Kind.SEMICN) {
+            return;
+        }
 
         //Error Handle
         ArrayList<Integer> rParams = new ArrayList<>();
@@ -740,7 +752,7 @@ public class SyntacticalAnalyser {
                 CondHandle();
 
                 if (curToken.kind != Kind.RPARENT) {
-                    handleError(curToken.line, ErrorKind.MissParenthesis);
+                    handleError(prevToken().line, ErrorKind.MissParenthesis);
                 } else {
                     moveForward();
                 }
@@ -767,7 +779,7 @@ public class SyntacticalAnalyser {
                 CondHandle();
 
                 if (curToken.kind != Kind.RPARENT) {
-                    handleError(curToken.line, ErrorKind.MissParenthesis);
+                    handleError(prevToken().line, ErrorKind.MissParenthesis);
                 } else {
                     moveForward();
                 }
@@ -778,14 +790,14 @@ public class SyntacticalAnalyser {
                 break;
 
             case BREAKTK:
-                moveForward();
-
                 if (whileFlag == 0) {
                     handleError(curToken.line, ErrorKind.BreakOrContinueOutsideLoop);
                 }
 
+                moveForward();
+
                 if (curToken.kind != Kind.SEMICN) {
-                    handleError(curToken.line, ErrorKind.MissSemiColon);
+                    handleError(prevToken().line, ErrorKind.MissSemiColon);
                 } else {
                     moveForward();
                 }
@@ -793,14 +805,14 @@ public class SyntacticalAnalyser {
                 break;
 
             case CONTINUETK:
-                moveForward();
-
                 if (whileFlag == 0) {
                     handleError(curToken.line, ErrorKind.BreakOrContinueOutsideLoop);
                 }
 
+                moveForward();
+
                 if (curToken.kind != Kind.SEMICN) {
-                    handleError(curToken.line, ErrorKind.MissSemiColon);
+                    handleError(prevToken().line, ErrorKind.MissSemiColon);
                 } else {
                     moveForward();
                 }
@@ -808,6 +820,7 @@ public class SyntacticalAnalyser {
                 break;
 
             case RETURNTK:
+                Token returnTk = curToken;
                 moveForward();
 
                 if (curToken.kind == Kind.SEMICN) {
@@ -819,14 +832,14 @@ public class SyntacticalAnalyser {
                 } else {
                     // Error Handle
                     if(!needReturn) {
-                        handleError(curToken.line, ErrorKind.ReturnInVoid);
+                        handleError(curToken.line, ErrorKind.   ReturnInVoid);
                     }
                     // Error Handle
 
                     ExpHandle();
 
                     if (curToken.kind != Kind.SEMICN) {
-                        handleError(curToken.line, ErrorKind.MissSemiColon);
+                        handleError(prevToken().line, ErrorKind.MissSemiColon);
                     } else {
                         moveForward();
                     }
@@ -858,16 +871,7 @@ public class SyntacticalAnalyser {
                     handleError();
 
                 }
-                // Error Handle
-                if (!str.isLegalFormatString()) {
-                    handleError(str.line, ErrorKind.IllegalChar);
-                }
-                if (paramCount != str.formatParamCount()) {
-                    handleError(printf.line, ErrorKind.FormatStringNotMatch);
-                }
-
                 moveForward();
-
 
                 while (curToken.kind == Kind.COMMA) {
                     moveForward();
@@ -875,14 +879,22 @@ public class SyntacticalAnalyser {
                     paramCount += 1;
                 }
 
+                // Error Handle
+                if (str.isIllegalFormatString()) {
+                    handleError(str.line, ErrorKind.IllegalChar);
+                }
+                if (paramCount != str.formatParamCount()) {
+                    handleError(printf.line, ErrorKind.FormatStringNotMatch);
+                }
+
                 if (curToken.kind != Kind.RPARENT) {
-                    handleError(curToken.line, ErrorKind.MissParenthesis);
+                    handleError(prevToken().line, ErrorKind.MissParenthesis);
                 } else {
                     moveForward();
                 }
 
                 if (curToken.kind != Kind.SEMICN) {
-                    handleError(curToken.line, ErrorKind.MissSemiColon);
+                    handleError(prevToken().line, ErrorKind.MissSemiColon);
                 } else {
                     moveForward();
                 }
@@ -908,13 +920,6 @@ public class SyntacticalAnalyser {
 
                 if (!isLVal) {
                     ExpHandle();
-
-                    if (curToken.kind != Kind.SEMICN) {
-                        handleError(curToken.line, ErrorKind.MissSemiColon);
-                    } else {
-                        moveForward();
-                    }
-
                 } else {
                     // CodeGen
                     Token identifier = curToken;
@@ -926,7 +931,7 @@ public class SyntacticalAnalyser {
                     // Error Handle
 
                     int kindInt = LValHandle();
-                    PCodes.add(new PCode(PCodeKind.ADDRESS, getIdentifier(identifier).scope + "-" + identifier.content, kindInt));
+//                    PCodes.add(new PCode(PCodeKind.ADDRESS, getIdentifier(identifier).scope + "-" + identifier.content, kindInt));
                     // CodeGen
 
                     if (curToken.kind != Kind.ASSIGN) {
@@ -947,27 +952,22 @@ public class SyntacticalAnalyser {
                         moveForward();
 
                         if (curToken.kind != Kind.RPARENT) {
-                            handleError(curToken.line, ErrorKind.MissParenthesis);
+                            handleError(prevToken().line, ErrorKind.MissParenthesis);
                         } else {
                             moveForward();
                         }
-
-                        if (curToken.kind != Kind.SEMICN) {
-                            handleError();
-                        }
-                        moveForward();
                     } else {
                         ExpHandle();
-
-                        if (curToken.kind != Kind.SEMICN) {
-                            handleError(curToken.line, ErrorKind.MissSemiColon);
-                        } else {
-                            moveForward();
-                        }
                     }
 
                     // CodeGen
-                    PCodes.add(new PCode(PCodeKind.POP, getIdentifier(identifier).scope + "-" + identifier.content));
+//                    PCodes.add(new PCode(PCodeKind.POP, getIdentifier(identifier).scope + "-" + identifier.content));
+                }
+
+                if (curToken.kind != Kind.SEMICN) {
+                    handleError(prevToken().line, ErrorKind.MissSemiColon);
+                } else {
+                    moveForward();
                 }
 
                 break;
@@ -978,7 +978,7 @@ public class SyntacticalAnalyser {
                 } else {
                     ExpHandle();
                     if (curToken.kind != Kind.SEMICN) {
-                        handleError(curToken.line, ErrorKind.MissSemiColon);
+                        handleError(prevToken().line, ErrorKind.MissSemiColon);
                     } else {
                         moveForward();
                     }
@@ -1149,7 +1149,7 @@ public class SyntacticalAnalyser {
                 } else {
                     FuncRParamsHandle(identifier);
                     if (curToken.kind != Kind.RPARENT) {
-                        handleError(curToken.line, ErrorKind.MissParenthesis);
+                        handleError(prevToken().line, ErrorKind.MissParenthesis);
                     } else {
                         moveForward();
                     }
@@ -1277,7 +1277,7 @@ public class SyntacticalAnalyser {
                 ExpHandle();
 
                 if (curToken.kind != Kind.RBRACK) {
-                    handleError(curToken.line, ErrorKind.MissBracket);
+                    handleError(prevToken().line, ErrorKind.MissBrack);
                 } else {
                     moveForward();
                 }
@@ -1287,7 +1287,7 @@ public class SyntacticalAnalyser {
                     ExpHandle();
 
                     if (curToken.kind != Kind.RBRACK) {
-                        handleError(curToken.line, ErrorKind.MissBracket);
+                        handleError(prevToken().line, ErrorKind.MissBrack);
                     } else {
                         moveForward();
                     }

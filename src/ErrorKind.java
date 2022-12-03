@@ -9,7 +9,7 @@ public enum ErrorKind {
     ConstModify,
     MissSemiColon,
     MissParenthesis,
-    MissBracket,
+    MissBrack,
     FormatStringNotMatch,
     BreakOrContinueOutsideLoop
 }

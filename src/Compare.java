@@ -15,7 +15,7 @@ public class Compare {
                 if (!custom_line.equals(correct_line)) {
                     System.out.println("Line: " + cur_line + " dont match");;
                     System.out.println("Correct: " + correct_line);
-                    System.out.println("Custom: " + custom_line);
+                    System.out.println("Custom: " + custom_line + "\n");
 //                    break;
                 }
                 cur_line++;
@@ -39,6 +39,6 @@ public class Compare {
 //        Compiler.main(new String[]{});
 //        Compare("output.txt", "correct.txt");
 //        Compare("pcoderesult.txt", "correct.txt");
-        Compare("errors.txt", "correct.txt");
+        Compare("error.txt", "correct.txt");
     }
 }

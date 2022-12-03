@@ -136,18 +136,10 @@ public class LexicalAnalyser {
                 tokens.add(new Token(Kind.STRCON, "\"" + builder + "\"", line));
                 return;
             } else {
-                if (c == '\\') {
-                    metSlash = true;
-                } else {
-                    if (metSlash && c == 'n') {
-                        builder.append("\n");
-                    } else {
-                        builder.append(c);
-                    }
-                    metSlash = false;
-                }
+                builder.append(c);
             }
         }
+
     }
 
     public void parseLogic(char pre) {

@@ -47,6 +47,7 @@ public class FileHandler {
 
     public void printErrors(ArrayList<Error> lines) throws IOException {
         for (Error err : lines) {
+            System.out.println(err.toString());
             testWriter.write(err.toString() + "\n");
         }
         testWriter.flush();

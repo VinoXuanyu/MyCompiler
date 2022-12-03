@@ -76,21 +76,20 @@ public class Token {
                 (ch >= 40 && ch <= 126);
     }
 
-    public boolean isLegalFormatString() {
+    public boolean isIllegalFormatString() {
         for (int i = 1; i < content.length() - 1; i++) {
             char ch = content.charAt(i);
-            if (isLegalChar(ch)) {
-                if (ch == '\\' && content.charAt(i + 1) != 'n') {
-                    return false;
-                }
-            } else {
+            if (!isLegalChar(ch)) {
                 if (ch == '%' && content.charAt(i + 1) == 'd') {
                     continue;
                 }
-                return false;
+                return true;
+            } else {
+                if (ch == '\\' && content.charAt(i + 1) != 'n') {
+                    return true;
+                }
             }
         }
-
-        return true;
+        return false;
     }
 }

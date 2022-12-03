@@ -13,7 +13,8 @@ public class MapErr2Kind {
         map.put(ErrorKind.MissReturn, "g");
         map.put(ErrorKind.ConstModify, "h");
         map.put(ErrorKind.MissSemiColon, "i");
-        map.put(ErrorKind.MissParenthesis, "k");
+        map.put(ErrorKind.MissParenthesis, "j");
+        map.put(ErrorKind.MissBrack, "k");
         map.put(ErrorKind.FormatStringNotMatch, "l");
         map.put(ErrorKind.BreakOrContinueOutsideLoop, "m");
     }
