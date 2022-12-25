@@ -1,9 +1,9 @@
 package CodeGen;
 
-public class LabelCreator {
+public class LabelGen {
     public int num = 0;
 
-    public String getLabel(String kind) {
+    public String gen(String kind) {
         num++;
         return "label_" + kind + "_"+ num;
     }

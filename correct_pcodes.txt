@@ -1,206 +1,641 @@
-MAIN main
-VAR 1_a1
-PUSH 1
-VAR 1__bc
-PUSH 2
-NEG
-VAR 1__de
+VAR 0_s1_1
 PUSH 3
-VAR 1_fff
+PUSH 5
+DIMVAR 0_s1_1, 2
+PUSH 25
 PUSH 4
-POS
-VAR 1_ggg
-PUSH 5
-VAR 1_hhh
-PUSH 6
-VAR 1_x1
+MUL
+PUSH 200
+PUSH 300
+PUSH 400
+PUSH 500
 PUSH 111
-VAR 1_x2
+PUSH 222
+PUSH 333
+PUSH 444
+PUSH 555
+PUSH 99
+PUSH 102
+PUSH 0
 PUSH 123
-PUSH 234
-ADD
-VAR 1_x3
-PUSH 6
+PUSH 145
+VAR 0_s2_1
+PUSH 3
 PUSH 5
+DIMVAR 0_s2_1, 2
+PUSH 100
+PUSH 200
+PUSH 300
+PUSH 400
+PUSH 500
+PUSH 111
+PUSH 222
+PUSH 333
+PUSH 444
+PUSH 555
+PUSH 99
+PUSH 102
+PUSH 0
+PUSH 123
+PUSH 145
+VAR 0_add
 PUSH 3
-ADD
-MUL
-PUSH 10
-SUB
-VAR 1_x4
-PLACEHOLDER 1_x4, 0
-PUSH 1_x4
-ADDRESS 1_x4, 0
-PUSH 1_x1
-VALUE 1_x1, 0
-PUSH 1_x2
-VALUE 1_x2, 0
+DIMVAR 0_add, 1
+PUSH 123
+PUSH 666
+PUSH 456
+VAR 0_s_2
 PUSH 3
-MUL
-ADD
-POP 1_x4
-VAR 1_x5
-PLACEHOLDER 1_x5, 0
-VAR 1_x6
-PLACEHOLDER 1_x6, 0
-VAR 1_x7
-PLACEHOLDER 1_x7, 0
-VAR 1_x8
-PLACEHOLDER 1_x8, 0
-VAR 1_x9
-PLACEHOLDER 1_x9, 0
-VAR 1_x10
-PLACEHOLDER 1_x10, 0
-VAR 1_y1
-PLACEHOLDER 1_y1, 0
-VAR 1_y2
-PLACEHOLDER 1_y2, 0
-VAR 1_y3
-PLACEHOLDER 1_y3, 0
-VAR 1_y4
-PLACEHOLDER 1_y4, 0
-VAR 1_y5
-PLACEHOLDER 1_y5, 0
-VAR 1_y6
-PLACEHOLDER 1_y6, 0
-VAR 1_y7
-PLACEHOLDER 1_y7, 0
-VAR 1_y8
-PLACEHOLDER 1_y8, 0
-PUSH 1_x5
-ADDRESS 1_x5, 0
-GETINT
-POP 1_x5
-PUSH 1_x6
-ADDRESS 1_x6, 0
-GETINT
-POP 1_x6
-PUSH 1_x7
-ADDRESS 1_x7, 0
-GETINT
-POP 1_x7
-PUSH 1_x8
-ADDRESS 1_x8, 0
-GETINT
-POP 1_x8
-PUSH 1_x9
-ADDRESS 1_x9, 0
-GETINT
-POP 1_x9
-PUSH 1_x10
-ADDRESS 1_x10, 0
-GETINT
-POP 1_x10
-PRINT "20373184
-"
-PRINT "Wow, you will begin test your program!
-"
+DIMVAR 0_s_2, 1
+PUSH 0
+PUSH 0
+PUSH 0
+VAR 0_s_3
+PUSH 3
+DIMVAR 0_s_3, 1
+PUSH 0
+PUSH 0
+PUSH 0
+VAR 0_a1
+PUSH 1
+VAR 0_a2
+PUSH 2
+VAR 0_a3
+PUSH 3
+VAR 0_month
+PUSH 9
+DIMVAR 0_month, 1
 PUSH 1
 PUSH 2
-ADD
-PRINT "%d
-"
-PUSH 1_ggg
-VALUE 1_ggg, 0
-PUSH 1_hhh
-VALUE 1_hhh, 0
-MUL
-PRINT "%d
-"
-PUSH 1_y1
-ADDRESS 1_y1, 0
-PUSH 1_a1
-VALUE 1_a1, 0
-PUSH 1__bc
-VALUE 1__bc, 0
-ADD
-PUSH 1__de
-VALUE 1__de, 0
-MUL
-POP 1_y1
-PUSH 1_y2
-ADDRESS 1_y2, 0
-PUSH 1_x2
-VALUE 1_x2, 0
-PUSH 1_x1
-VALUE 1_x1, 0
-MOD
-PUSH 1_ggg
-VALUE 1_ggg, 0
-ADD
-POP 1_y2
-PUSH 1_y3
-ADDRESS 1_y3, 0
-PUSH 1_x4
-VALUE 1_x4, 0
-PUSH 1_x3
-VALUE 1_x3, 0
-MUL
-PUSH 1_fff
-VALUE 1_fff, 0
-SUB
-POP 1_y3
-PUSH 1_y4
-ADDRESS 1_y4, 0
-PUSH 1_x5
-VALUE 1_x5, 0
-PUSH 2
-DIV
-PUSH 1_hhh
-VALUE 1_hhh, 0
-MUL
-POP 1_y4
-PUSH 1_y5
-ADDRESS 1_y5, 0
-PUSH 1_x6
-VALUE 1_x6, 0
-PUSH 1
-PUSH 1_x7
-VALUE 1_x7, 0
-ADD
-MUL
 PUSH 3
-MOD
-POP 1_y5
-PUSH 1_y6
-ADDRESS 1_y6, 0
-PUSH 1_x8
-VALUE 1_x8, 0
-NEG
-POP 1_y6
-PUSH 1_y7
-ADDRESS 1_y7, 0
+PUSH 4
+PUSH 5
 PUSH 6
-PUSH 1_x9
-VALUE 1_x9, 0
+PUSH 7
+PUSH 8
+PUSH 9
+VAR 0_year_1
+PUSH 4
+VAR 0_year_2
+PUSH 0_year_1
+VALUE 0_year_1, 0
+PUSH 25
+MUL
+FUNC @get_average:
+PUSH 5
+PARA 1_a, 2
+VAR 1_s
+PUSH 0
+VAR 1_i
+PUSH 2
+label_while_1:
+PUSH 1_i
+VALUE 1_i, 0
+PUSH 0
+CMPGE
+label_cond_0_4:
+JZ label_while_end_2
+label_while_block_3:
+PUSH 1_s
+ADDRESS 1_s, 0
+PUSH 1_a
+PUSH 1_i
+VALUE 1_i, 0
+PUSH 0
+VALUE 1_a, 0
+PUSH 1_a
+PUSH 1_i
+VALUE 1_i, 0
+PUSH 1
+VALUE 1_a, 0
 ADD
-POP 1_y7
-PUSH 1_y1
-VALUE 1_y1, 0
-PRINT "%d
+PUSH 1_a
+PUSH 1_i
+VALUE 1_i, 0
+PUSH 2
+VALUE 1_a, 0
+ADD
+PUSH 1_a
+PUSH 1_i
+VALUE 1_i, 0
+PUSH 3
+VALUE 1_a, 0
+ADD
+PUSH 1_a
+PUSH 1_i
+VALUE 1_i, 0
+PUSH 4
+VALUE 1_a, 0
+ADD
+POP 1_s
+PUSH 1_s
+ADDRESS 1_s, 0
+PUSH 1_s
+VALUE 1_s, 0
+PUSH 5
+DIV
+POP 1_s
+PUSH 0_s_2
+PUSH 1_i
+VALUE 1_i, 0
+ADDRESS 0_s_2, 0
+PUSH 1_s
+VALUE 1_s, 0
+POP 0_s_2
+PUSH 1_i
+ADDRESS 1_i, 0
+PUSH 1_i
+VALUE 1_i, 0
+PUSH 1
+SUB
+POP 1_i
+JMP label_while_1
+label_while_end_2:
+RET 0
+RET 0
+ENDFUNC
+FUNC @blank:
+PARA 3_a, 0
+PARA 3_b, 0
+PARA 3_c, 0
+RET 0
+ENDFUNC
+FUNC @blank2:
+PARA 4_a, 0
+PARA 4_b, 1
+PARA 4_C23, 1
+RET 0
+ENDFUNC
+FUNC @add_1:
+PARA 5_a, 0
+PARA 5_s, 1
+VAR 5_i_1
+PUSH 2
+VAR 5_sum
+PUSH 0
+label_while_5:
+PUSH 5_i_1
+VALUE 5_i_1, 0
+PUSH 0
+CMPGE
+label_cond_0_8:
+JZ label_while_end_6
+label_while_block_7:
+PUSH 5_sum
+ADDRESS 5_sum, 0
+PUSH 5_sum
+VALUE 5_sum, 0
+PUSH 5_s
+PUSH 5_i_1
+VALUE 5_i_1, 0
+VALUE 5_s, 0
+ADD
+POP 5_sum
+PUSH 5_i_1
+ADDRESS 5_i_1, 0
+PUSH 5_i_1
+VALUE 5_i_1, 0
+PUSH 1
+SUB
+POP 5_i_1
+JMP label_while_5
+label_while_end_6:
+PUSH 5_a
+ADDRESS 5_a, 0
+PUSH 5_a
+VALUE 5_a, 0
+PUSH 3
+SUB
+POP 5_a
+PUSH 5_sum
+ADDRESS 5_sum, 0
+PUSH 5_sum
+VALUE 5_sum, 0
+PUSH 5_a
+VALUE 5_a, 0
+DIV
+POP 5_sum
+PUSH 5_a
+ADDRESS 5_a, 0
+PUSH 5_a
+VALUE 5_a, 0
+PUSH 4
+ADD
+POP 5_a
+PUSH 5_sum
+ADDRESS 5_sum, 0
+PUSH 5_sum
+VALUE 5_sum, 0
+PUSH 5_a
+VALUE 5_a, 0
+MUL
+POP 5_sum
+PUSH 5_sum
+ADDRESS 5_sum, 0
+PUSH 5_sum
+VALUE 5_sum, 0
+PUSH 5_a
+VALUE 5_a, 0
+SUB
+POP 5_sum
+PUSH 5_a
+ADDRESS 5_a, 0
+PUSH 5_a
+VALUE 5_a, 0
+PUSH 6
+ADD
+POP 5_a
+PUSH 5_sum
+ADDRESS 5_sum, 0
+PUSH 5_sum
+VALUE 5_sum, 0
+PUSH 5_a
+VALUE 5_a, 0
+MOD
+POP 5_sum
+PUSH 5_sum
+VALUE 5_sum, 0
+RET 1
+RET 0
+ENDFUNC
+FUNC @checkyear:
+PARA 7_year, 0
+label_if_9:
+PUSH 7_year
+VALUE 7_year, 0
+PUSH 0
+CMPGE
+label_cond_0_13:
+JZ label_else_10
+label_if_block_12:
+label_if_14:
+PUSH 7_year
+VALUE 7_year, 0
+PUSH 2022
+POS
+CMPNE
+label_cond_0_18:
+JNZ label_if_block_17
+PUSH 7_year
+VALUE 7_year, 0
+PUSH 2021
+CMPLE
+label_cond_1_19:
+OR
+JZ label_else_15
+label_if_block_17:
+label_if_20:
+PUSH 7_year
+VALUE 7_year, 0
+PUSH 0_year_1
+VALUE 0_year_1, 0
+NEG
+PUSH 0_year_2
+VALUE 0_year_2, 0
+NEG
+MUL
+MOD
+PUSH 0
+CMPEQ
+label_cond_0_24:
+JNZ label_if_block_23
+PUSH 7_year
+VALUE 7_year, 0
+PUSH 0_year_1
+VALUE 0_year_1, 0
+MOD
+PUSH 0
+CMPEQ
+JZ label_cond_1_25
+PUSH 7_year
+VALUE 7_year, 0
+PUSH 0_year_2
+VALUE 0_year_2, 0
+MOD
+PUSH 0
+CMPNE
+AND
+label_cond_1_25:
+OR
+JZ label_else_21
+label_if_block_23:
+PUSH 7_year
+VALUE 7_year, 0
+PRINT "run:%d
 "
-PUSH 1_y2
-VALUE 1_y2, 0
-PRINT "%d
+JMP label_if_end_22
+label_else_21:
+PUSH 7_year
+VALUE 7_year, 0
+PRINT "not run:%d
 "
-PUSH 1_y3
-VALUE 1_y3, 0
-PRINT "%d
+label_if_end_22:
+JMP label_if_end_16
+label_else_15:
+PRINT "2022!!!
 "
-PUSH 1_y4
-VALUE 1_y4, 0
-PRINT "%d
+label_if_end_16:
+JMP label_if_end_11
+label_else_10:
+label_if_end_11:
+PUSH 7_year
+VALUE 7_year, 0
+RET 1
+RET 0
+ENDFUNC
+FUNC @printsth:
+PRINT "printsth
 "
-PUSH 1_y5
-VALUE 1_y5, 0
-PRINT "%d
+RET 0
+RET 0
+ENDFUNC
+MAIN main
+VAR 15_j
+PUSH 0
+VAR 15_k
+PUSH 3
+VAR 15_i
+PUSH 3
+VAR 15_in_put
+PLACEHOLDER 15_in_put, 0
+VAR 15_x
+PLACEHOLDER 15_x, 0
+VAR 15_y
+PLACEHOLDER 15_y, 0
+VAR 15_z
+PLACEHOLDER 15_z, 0
+VAR 15_x_1
+PLACEHOLDER 15_x_1, 0
+VAR 15_y_1
+PLACEHOLDER 15_y_1, 0
+VAR 15_z_1
+PLACEHOLDER 15_z_1, 0
+VAR 15_aaa
+PLACEHOLDER 15_aaa, 0
+VAR 15_bbb
+PLACEHOLDER 15_bbb, 0
+VAR 15_ccc
+PLACEHOLDER 15_ccc, 0
+VAR 15_ddd
+PLACEHOLDER 15_ddd, 0
+VAR 15_eee
+PLACEHOLDER 15_eee, 0
+VAR 15_fff
+PLACEHOLDER 15_fff, 0
+PUSH 15_in_put
+ADDRESS 15_in_put, 0
+GETINT
+POP 15_in_put
+PUSH 15_x
+ADDRESS 15_x, 0
+GETINT
+POP 15_x
+PUSH 15_y
+ADDRESS 15_y, 0
+GETINT
+POP 15_y
+PUSH 15_z
+ADDRESS 15_z, 0
+GETINT
+POP 15_z
+PUSH 15_x_1
+ADDRESS 15_x_1, 0
+GETINT
+POP 15_x_1
+PUSH 15_y_1
+ADDRESS 15_y_1, 0
+GETINT
+POP 15_y_1
+PUSH 15_z_1
+ADDRESS 15_z_1, 0
+GETINT
+POP 15_z_1
+PRINT "20373614
 "
-PUSH 1_y6
-VALUE 1_y6, 0
-PUSH 1_y7
-VALUE 1_y7, 0
-PRINT "%d-%d
+PUSH 0_s1_1
+ADDRESS 0_s1_1, 2
+RPARA 2
+$get_average
+label_while_26:
+PUSH 15_i
+VALUE 15_i, 0
+PUSH 0
+CMPGT
+label_cond_0_29:
+JZ label_while_end_27
+label_while_block_28:
+label_if_30:
+PUSH 0_s_2
+PUSH 15_i
+VALUE 15_i, 0
+PUSH 1
+SUB
+VALUE 0_s_2, 0
+PUSH 300
+CMPEQ
+label_cond_0_34:
+JZ label_else_31
+label_if_block_33:
+PUSH 15_i
+ADDRESS 15_i, 0
+PUSH 15_i
+VALUE 15_i, 0
+PUSH 1
+SUB
+POP 15_i
+JMP label_while_26
+JMP label_if_end_32
+label_else_31:
+label_if_35:
+PUSH 1
+JZ label_cond_0_39
+PUSH 0_s_2
+PUSH 15_i
+VALUE 15_i, 0
+PUSH 1
+SUB
+VALUE 0_s_2, 0
+PUSH 300
+SUB
+NOT
+AND
+JZ label_cond_0_39
+PUSH 0_s_2
+PUSH 15_i
+VALUE 15_i, 0
+PUSH 1
+SUB
+VALUE 0_s_2, 0
+PUSH 100
+CMPLT
+AND
+label_cond_0_39:
+JZ label_else_36
+label_if_block_38:
+PUSH 0_s_2
+PUSH 15_i
+VALUE 15_i, 0
+PUSH 1
+SUB
+VALUE 0_s_2, 0
+PRINT "LOW:%d
 "
+JMP label_if_end_37
+label_else_36:
+label_if_end_37:
+label_if_40:
+PUSH 1
+JZ label_cond_0_44
+PUSH 0
+PUSH 1
+CMPGT
+AND
+label_cond_0_44:
+JZ label_else_41
+label_if_block_43:
+label_if_45:
+PUSH 0_s_2
+PUSH 15_i
+VALUE 15_i, 0
+PUSH 1
+SUB
+VALUE 0_s_2, 0
+PUSH 300
+CMPEQ
+label_cond_0_49:
+JNZ label_if_block_48
+PUSH 0_s_2
+PUSH 15_i
+VALUE 15_i, 0
+PUSH 1
+SUB
+VALUE 0_s_2, 0
+PUSH 332
+CMPGT
+label_cond_1_50:
+OR
+JZ label_else_46
+label_if_block_48:
+PUSH 0_s_2
+PUSH 15_i
+VALUE 15_i, 0
+PUSH 1
+SUB
+VALUE 0_s_2, 0
+PRINT "HIGH:%d
+"
+JMP label_while_end_27
+JMP label_if_end_47
+label_else_46:
+label_if_end_47:
+JMP label_if_end_42
+label_else_41:
+label_if_end_42:
+PUSH 15_i
+ADDRESS 15_i, 0
+PUSH 15_i
+VALUE 15_i, 0
+PUSH 1
+SUB
+POP 15_i
+label_if_end_32:
+JMP label_while_26
+label_while_end_27:
+PUSH 15_j
+ADDRESS 15_j, 0
+PUSH 5
+RPARA 0
+PUSH 0_add
+ADDRESS 0_add, 1
+RPARA 1
+$add_1
+POP 15_j
+PUSH 15_j
+VALUE 15_j, 0
+PRINT "add:%d
+"
+PUSH 15_k
+ADDRESS 15_k, 0
+PUSH 15_in_put
+VALUE 15_in_put, 0
+RPARA 0
+PUSH 0_add
+ADDRESS 0_add, 1
+RPARA 1
+$add_1
+POP 15_k
+PUSH 15_k
+VALUE 15_k, 0
+PRINT "input:%d
+"
+PUSH 15_aaa
+ADDRESS 15_aaa, 0
+PUSH 15_x
+VALUE 15_x, 0
+RPARA 0
+$checkyear
+POP 15_aaa
+PUSH 15_bbb
+ADDRESS 15_bbb, 0
+PUSH 15_y
+VALUE 15_y, 0
+RPARA 0
+$checkyear
+POP 15_bbb
+PUSH 15_ccc
+ADDRESS 15_ccc, 0
+PUSH 15_z
+VALUE 15_z, 0
+RPARA 0
+$checkyear
+POP 15_ccc
+PUSH 15_ddd
+ADDRESS 15_ddd, 0
+PUSH 15_x_1
+VALUE 15_x_1, 0
+RPARA 0
+$checkyear
+POP 15_ddd
+PUSH 15_eee
+ADDRESS 15_eee, 0
+PUSH 15_y_1
+VALUE 15_y_1, 0
+RPARA 0
+$checkyear
+POP 15_eee
+PUSH 15_fff
+ADDRESS 15_fff, 0
+PUSH 15_z_1
+VALUE 15_z_1, 0
+RPARA 0
+$checkyear
+POP 15_fff
+PUSH 15_j
+VALUE 15_j, 0
+RPARA 0
+PUSH 0_add
+ADDRESS 0_add, 1
+RPARA 1
+PUSH 0_s1_1
+PUSH 0
+ADDRESS 0_s1_1, 1
+RPARA 1
+$blank2
+PUSH 15_aaa
+VALUE 15_aaa, 0
+PUSH 15_bbb
+VALUE 15_bbb, 0
+PUSH 15_ccc
+VALUE 15_ccc, 0
+PUSH 15_ddd
+VALUE 15_ddd, 0
+PUSH 15_eee
+VALUE 15_eee, 0
+PUSH 15_fff
+VALUE 15_fff, 0
+PRINT "year1:%d,year2:%d,year3:%d,year4:%d,year5:%d,year6:%d
+"
+$printsth
 PUSH 0
 RET 1
 EXIT

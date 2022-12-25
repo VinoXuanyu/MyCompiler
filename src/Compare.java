@@ -12,7 +12,10 @@ public class Compare {
             long cur_line = 1;
             String custom_line = "", correct_line = "";
             while ((custom_line = custom.readLine()) != null && (correct_line = correct.readLine()) != null) {
+                custom_line = custom_line.replace("-", "_");
+                custom_line = custom_line.trim();
                 if (!custom_line.equals(correct_line)) {
+
                     System.out.println("Line: " + cur_line + " dont match");;
                     System.out.println("Correct: " + correct_line);
                     System.out.println("Custom: " + custom_line + "\n");
@@ -39,6 +42,7 @@ public class Compare {
 //        Compiler.main(new String[]{});
 //        Compare("output.txt", "correct.txt");
 //        Compare("pcoderesult.txt", "correct.txt");
-        Compare("error.txt", "correct.txt");
+        Compare("pcodes.txt", "correct_pcodes" +
+                ".txt");
     }
 }

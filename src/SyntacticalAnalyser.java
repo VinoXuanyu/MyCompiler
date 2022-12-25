@@ -1,3 +1,4 @@
+import CodeGen.LabelGen;
 import CodeGen.PCode;
 import CodeGen.PCodeKind;
 
@@ -19,31 +20,33 @@ public class SyntacticalAnalyser {
 
     public static ArrayList<Error> errors = new ArrayList<>();
 
-
-
-    public int scope = -1;
-    public int scopeID = -1;
-    public static ArrayList<PCode> PCodes = new ArrayList<>();
-    public HashMap<Integer, IdentifierMap> mapIdentifierGroup = new HashMap<>();
-    public HashMap<String, Function> mapFunction = new HashMap<>();
-
     // Error Handle
     public int whileFlag = 0;
     public boolean needReturn = false;
+    public HashMap<Integer, IdentifierMap> mapIdentifierGroup = new HashMap<>();
+    public HashMap<String, Function> mapFunction = new HashMap<>();
+    public int curScope = -1;
+
+    // Code Gen
+    public int scope = -1;
+    public static ArrayList<PCode> PCodes = new ArrayList<>();
+    public LabelGen labelGen = new LabelGen();
+    public ArrayList<HashMap<String, String>> labelsIf = new ArrayList<>();
+    public ArrayList<HashMap<String, String>> labelsWhile = new ArrayList<>();
 
     public void addScope() {
-        scopeID += 1;
         scope += 1;
-        mapIdentifierGroup.put(scope, new IdentifierMap());
+        curScope += 1;
+        mapIdentifierGroup.put(curScope, new IdentifierMap());
     }
 
     public void removeScope() {
-        mapIdentifierGroup.remove(scope);
-        scope -= 1;
+        mapIdentifierGroup.remove(curScope);
+        curScope -= 1;
     }
 
     public void addIdentifierToScope(Token token, String kind, int kindInt) {
-        mapIdentifierGroup.get(scope).put(kind, kindInt, token, scopeID);
+        mapIdentifierGroup.get(curScope).put(kind, kindInt, token, scope);
     }
 
     public Identifier getIdentifier(Token token) {
@@ -57,7 +60,7 @@ public class SyntacticalAnalyser {
     }
 
     public boolean identifierDefinedInScope(Token token) {
-        return mapIdentifierGroup.get(scope).has(token);
+        return mapIdentifierGroup.get(curScope).has(token);
     }
 
     public boolean identifierDefinedGlobally(Token token) {
@@ -226,7 +229,7 @@ public class SyntacticalAnalyser {
         // BType → 'int'
 
         if (curToken.kind != Kind.INTTK) {
-//            handleError();
+            handleError();
         } else {
             moveForward();
         }
@@ -250,7 +253,7 @@ public class SyntacticalAnalyser {
 
         // CodeGen
         int kindInt = 0;
-        PCodes.add(new PCode(PCodeKind.VAR, scopeID + "-" + curToken.content));
+        PCodes.add(new PCode(PCodeKind.VARIABLE, scope + "-" + curToken.content));
         // CodeGen
 
         moveForward();
@@ -292,7 +295,7 @@ public class SyntacticalAnalyser {
 
         // CodeGen
         if (kindInt > 0) {
-            PCodes.add(new PCode(PCodeKind.DIMVAR, scopeID + "-" + identifier.content, kindInt));
+            PCodes.add(new PCode(PCodeKind.DIMVARIABLE, scope + "-" + identifier.content, kindInt));
         }
         addIdentifierToScope(identifier, "const", kindInt);
         // CodeGen
@@ -314,7 +317,7 @@ public class SyntacticalAnalyser {
 
         // CodeGen
         Token identifier = curToken;
-        PCodes.add(new PCode(PCodeKind.VAR, scopeID + "-" + identifier.content));
+        PCodes.add(new PCode(PCodeKind.VARIABLE, scope + "-" + identifier.content));
 
         int kindInt = 0;
         // CodeGe
@@ -362,7 +365,7 @@ public class SyntacticalAnalyser {
 
         // CodeGen
         if (kindInt > 0) {
-            PCodes.add(new PCode(PCodeKind.DIMVAR, scopeID + "-" + identifier.content, kindInt));
+            PCodes.add(new PCode(PCodeKind.DIMVARIABLE, scope + "-" + identifier.content, kindInt));
         }
         addIdentifierToScope(identifier, "var", kindInt);
         // CodeGen
@@ -372,7 +375,7 @@ public class SyntacticalAnalyser {
             InitValHandle();
         } else {
             // CodeGen
-            PCodes.add(new PCode(PCodeKind.PLACEHOLDER, scopeID + "-" + identifier.content, kindInt));
+            PCodes.add(new PCode(PCodeKind.PLACEHOLDER, scope + "-" + identifier.content, kindInt));
             // Codegen
         }
 
@@ -510,25 +513,24 @@ public class SyntacticalAnalyser {
             moveForward();
         }
 
-
-
-
-        boolean returned = BlockHandle(true);
-
         // CodeGen
         mapFunction.put(function.name, function);
         code.val2 = function.params.size();
-        PCodes.add(new PCode(PCodeKind.RET, 0));
-        PCodes.add(new PCode(PCodeKind.ENDFUNC));
-
-        removeScope();
         // CodeGen
+
+        boolean returned = BlockHandle(true);
 
         // Error Handle
         if (needReturn && !returned){
             handleError(tokens.get(p-1).line, ErrorKind.MissReturn);
         }
         // Error Handle
+
+        // CodeGen
+        removeScope();
+        PCodes.add(new PCode(PCodeKind.RETURN, 0));
+        PCodes.add(new PCode(PCodeKind.FUNCEND));
+        // CodeGen
 
         wrapNonterminal(Nonterminal.FuncDef);
     }
@@ -606,7 +608,7 @@ public class SyntacticalAnalyser {
         wrapNonterminal(Nonterminal.FuncFParam);
 
         // CodeGen
-//        PCodes.add(new PCode(PCodeKind.PARA, scopeID + "-" + identifier.content, paramType));
+        PCodes.add(new PCode(PCodeKind.PARAM, scope + "-" + identifier.content, paramType));
         addIdentifierToScope(identifier, "para", paramType);
         return paramType;
     }
@@ -646,7 +648,7 @@ public class SyntacticalAnalyser {
         //Error Handle
 
         // CodeGen
-        PCodes.add(new PCode(PCodeKind.RPARA, kind));
+        PCodes.add(new PCode(PCodeKind.REALPARAM, kind));
         // CodeGen
 
         while (curToken.kind == Kind.COMMA) {
@@ -655,7 +657,7 @@ public class SyntacticalAnalyser {
             // CodeGen
             kind = ExpHandle();
             rParams.add(kind);
-            PCodes.add(new PCode(PCodeKind.RPARA, kind));
+            PCodes.add(new PCode(PCodeKind.REALPARAM, kind));
             // CodeGen
         }
 
@@ -742,6 +744,17 @@ public class SyntacticalAnalyser {
 
         switch (curToken.kind) {
             case IFTK:
+                // Code Gen
+                HashMap<String, String> temp = new HashMap<>();
+                labelsIf.add(temp);
+
+                temp.put("if", labelGen.gen("if"));
+                temp.put("else", labelGen.gen("else"));
+                temp.put("if_end", labelGen.gen("if_end"));
+                temp.put("if_block", labelGen.gen("if_block"));
+                PCodes.add(new PCode(PCodeKind.LABEL, temp.get("if")));
+                // Code Gen
+
                 moveForward();
 
                 if (curToken.kind != Kind.LPARENT) {
@@ -749,7 +762,7 @@ public class SyntacticalAnalyser {
                 }
                 moveForward();
 
-                CondHandle();
+                CondHandle(Kind.IFTK);
 
                 if (curToken.kind != Kind.RPARENT) {
                     handleError(prevToken().line, ErrorKind.MissParenthesis);
@@ -757,17 +770,42 @@ public class SyntacticalAnalyser {
                     moveForward();
                 }
 
+                // Code Gen
+                PCodes.add(new PCode(PCodeKind.JZ, temp.get("else")));
+                PCodes.add(new PCode(PCodeKind.LABEL, temp.get("if_block")));
+                // Code Gen
 
                 StmtHandle();
+
+                // Code Gen
+                PCodes.add(new PCode(PCodeKind.JMP, temp.get("if_end")));
+                PCodes.add(new PCode(PCodeKind.LABEL, temp.get("else")));
+                // Code Gen
+
 
                 if (curToken.kind == Kind.ELSETK) {
                     moveForward();
                     StmtHandle();
                 }
 
+                // Code Gen
+                PCodes.add(new PCode(PCodeKind.LABEL, temp.get("if_end")));
+                labelsIf.remove(labelsIf.size() - 1);
+                // Code Gen
+
                 break;
 
             case WHILETK:
+                // Code Gen
+                temp = new HashMap<>();
+                labelsWhile.add(temp);
+
+                temp.put("while", labelGen.gen("while"));
+                temp.put("while_end", labelGen.gen("while_end"));
+                temp.put("while_block", labelGen.gen("while_block"));
+                PCodes.add(new PCode(PCodeKind.LABEL, temp.get("while")));
+                // Code Gen
+
                 moveForward();
                 whileFlag += 1;
 
@@ -776,7 +814,12 @@ public class SyntacticalAnalyser {
                 }
                 moveForward();
 
-                CondHandle();
+                CondHandle(Kind.WHILETK);
+
+                // Code Gen
+                PCodes.add(new PCode(PCodeKind.JZ, temp.get("while_end")));
+                PCodes.add(new PCode(PCodeKind.LABEL, temp.get("while_block")));
+                // Code Gen
 
                 if (curToken.kind != Kind.RPARENT) {
                     handleError(prevToken().line, ErrorKind.MissParenthesis);
@@ -785,15 +828,25 @@ public class SyntacticalAnalyser {
                 }
 
                 StmtHandle();
+
+                // Code Gen
+                PCodes.add(new PCode(PCodeKind.JMP, temp.get("while")));
+                PCodes.add(new PCode(PCodeKind.LABEL, temp.get("while_end")));
+                labelsWhile.remove(labelsWhile.size() - 1);
+                // Code Gen
+
                 whileFlag -= 1;
 
                 break;
 
             case BREAKTK:
+                // Code Gen
+                PCodes.add(new PCode(PCodeKind.JMP, labelsWhile.get(labelsWhile.size() - 1).get("while_end")));
+                // Code Gen
+
                 if (whileFlag == 0) {
                     handleError(curToken.line, ErrorKind.BreakOrContinueOutsideLoop);
                 }
-
                 moveForward();
 
                 if (curToken.kind != Kind.SEMICN) {
@@ -805,6 +858,10 @@ public class SyntacticalAnalyser {
                 break;
 
             case CONTINUETK:
+                // Code Gen
+                PCodes.add(new PCode(PCodeKind.JMP, labelsWhile.get(labelsWhile.size() - 1).get("while")));
+                // Code Gen
+
                 if (whileFlag == 0) {
                     handleError(curToken.line, ErrorKind.BreakOrContinueOutsideLoop);
                 }
@@ -827,7 +884,7 @@ public class SyntacticalAnalyser {
                     moveForward();
 
                     // CodeGen
-                    PCodes.add(new PCode(PCodeKind.RET, 0));
+                    PCodes.add(new PCode(PCodeKind.RETURN, 0));
                     // CodeGen
                 } else {
                     // Error Handle
@@ -845,7 +902,7 @@ public class SyntacticalAnalyser {
                     }
 
                     // CodeGen
-                    PCodes.add(new PCode(PCodeKind.RET, 1));
+                    PCodes.add(new PCode(PCodeKind.RETURN, 1));
                     // CodeGen
                 }
 
@@ -931,7 +988,7 @@ public class SyntacticalAnalyser {
                     // Error Handle
 
                     int kindInt = LValHandle();
-//                    PCodes.add(new PCode(PCodeKind.ADDRESS, getIdentifier(identifier).scope + "-" + identifier.content, kindInt));
+                    PCodes.add(new PCode(PCodeKind.ADDRESS, getIdentifier(identifier).scope + "-" + identifier.content, kindInt));
                     // CodeGen
 
                     if (curToken.kind != Kind.ASSIGN) {
@@ -961,7 +1018,7 @@ public class SyntacticalAnalyser {
                     }
 
                     // CodeGen
-//                    PCodes.add(new PCode(PCodeKind.POP, getIdentifier(identifier).scope + "-" + identifier.content));
+                    PCodes.add(new PCode(PCodeKind.POP, getIdentifier(identifier).scope + "-" + identifier.content));
                 }
 
                 if (curToken.kind != Kind.SEMICN) {
@@ -1017,7 +1074,7 @@ public class SyntacticalAnalyser {
             if (kind == Kind.PLUS) {
                 PCodes.add(new PCode(PCodeKind.ADD));
             } else {
-                PCodes.add(new PCode(PCodeKind.SUB));
+                PCodes.add(new PCode(PCodeKind.SUBTRACT));
             }
             // CodeGen
         }
@@ -1040,9 +1097,9 @@ public class SyntacticalAnalyser {
 
             // CodeGen
             if (kind == Kind.MULT) {
-                PCodes.add(new PCode(PCodeKind.MUL));
+                PCodes.add(new PCode(PCodeKind.MULTIPLY));
             } else if (kind == Kind.DIV) {
-                PCodes.add(new PCode(PCodeKind.DIV));
+                PCodes.add(new PCode(PCodeKind.DIVIDE));
             } else {
                 PCodes.add(new PCode(PCodeKind.MOD));
             }
@@ -1059,9 +1116,26 @@ public class SyntacticalAnalyser {
 
         AddExpHandle();
         while (curToken.kind == Kind.LSS || curToken.kind == Kind.LEQ || curToken.kind == Kind.GRE || curToken.kind == Kind.GEQ) {
+            // Code Gen
+            PCodeKind kind;
+            if (curToken.kind == Kind.LSS) {
+                kind = PCodeKind.CLT;
+            } else if (curToken.kind == Kind.LEQ) {
+                kind = PCodeKind.CLE;
+            } else if (curToken.kind == Kind.GRE) {
+                kind = PCodeKind.CGT;
+            } else {
+                kind = PCodeKind.CGE;
+            }
+            // Code Gen
+
             wrapNonterminal(Nonterminal.RelExp);
             moveForward();
             AddExpHandle();
+
+            // Code Gen
+            PCodes.add(new PCode(kind));
+            // Code Gen
         }
 
         wrapNonterminal(Nonterminal.RelExp);
@@ -1072,43 +1146,104 @@ public class SyntacticalAnalyser {
 
         RelExpHandle();
         while (curToken.kind == Kind.EQL || curToken.kind == Kind.NEQ) {
+
+            // Code Gen
+            PCodeKind kind;
+            if (curToken.kind == Kind.EQL) {
+                kind = PCodeKind.CEQ;
+            } else {
+                kind = PCodeKind.CNE;
+            }
+            // Code Gen
+
             wrapNonterminal(Nonterminal.EqExp);
             moveForward();
             RelExpHandle();
+
+            // Code Gen
+            PCodes.add(new PCode(kind));
+            // Code Gen
+
         }
 
         wrapNonterminal(Nonterminal.EqExp);
     }
 
-    public void LAndExpHandle() {
+    public void LAndExpHandle(Kind from, String label) {
         // EqExp | LAndExp '&&' EqExp
 
         EqExpHandle();
+        if (curToken.kind == Kind.AND) {
+            PCodes.add(new PCode(PCodeKind.JZ, label));
+        }
+
+        int count = 0;
         while (curToken.kind == Kind.AND) {
+            count += 1;
             wrapNonterminal(Nonterminal.LAndExp);
             moveForward();
             EqExpHandle();
+
+            // Code Gen
+            PCodes.add(new PCode(PCodeKind.AND));
+
+            if (curToken.kind == Kind.AND){
+                PCodes.add(new PCode(PCodeKind.JZ, label));
+            }
+            // Code Gen
         }
 
         wrapNonterminal(Nonterminal.LAndExp);
     }
 
-    public void LOrExpHandle() {
+    public void LOrExpHandle(Kind from) {
         // LOrExp → LAndExp | LOrExp '||' LAndExp
 
-        LAndExpHandle();
+        // Code Gen
+        String label = labelGen.gen("cond_" + 0);
+        LAndExpHandle(from, label);
+        PCodes.add(new PCode(PCodeKind.LABEL, label));
+        if (curToken.kind == Kind.OR) {
+            if (from == Kind.IFTK) {
+                PCodes.add(new PCode(PCodeKind.JNZ, labelsIf.get(labelsIf.size() - 1).get("if_block")));
+            } else {
+                PCodes.add(new PCode(PCodeKind.JNZ, labelsWhile.get(labelsWhile.size() - 1).get("while_block")));
+            }
+        }
+        // Code Gen
+
+        int count = 0;
         while (curToken.kind == Kind.OR) {
+            count += 1;
+
+            // Code Gen
+            label = labelGen.gen("cond_" + count);
+            // Code Gen
+
             wrapNonterminal(Nonterminal.LOrExp);
             moveForward();
-            LAndExpHandle();
+            LAndExpHandle(from, label);
+
+            // Code Gen
+            PCodes.add(new PCode(PCodeKind.LABEL, label));
+            PCodes.add(new PCode(PCodeKind.OR));
+
+            if (curToken.kind == Kind.OR){
+                if (from == Kind.IFTK) {
+                    PCodes.add(new PCode(PCodeKind.JNZ, labelsIf.get(labelsIf.size() - 1).get("if_block")));
+                } else {
+                    PCodes.add(new PCode(PCodeKind.JNZ, labelsWhile.get(labelsIf.size() - 1).get("while_block")));
+                }
+            }
+            // Code Gen
         }
 
         wrapNonterminal(Nonterminal.LOrExp);
     }
 
-    public void CondHandle() {
+    public void CondHandle(Kind kind) {
         isCond = true;
-        LOrExpHandle();
+        LOrExpHandle(kind);
         isCond = false;
 
         wrapNonterminal(Nonterminal.Cond);
@@ -1226,9 +1361,9 @@ public class SyntacticalAnalyser {
             Token identifier = curToken;
             kindInt = LValHandle();
             if (kindInt == 0) {
-//                PCodes.add(new PCode(PCodeKind.VALUE, getIdentifier(identifier).scope + "-" + identifier.content, kindInt));
+                PCodes.add(new PCode(PCodeKind.VALUE, getIdentifier(identifier).scope + "-" + identifier.content, kindInt));
             } else {
-//                PCodes.add(new PCode(PCodeKind.ADDRESS, getIdentifier(identifier).scope + "-" + identifier.content, kindInt));
+                PCodes.add(new PCode(PCodeKind.ADDRESS, getIdentifier(identifier).scope + "-" + identifier.content, kindInt));
             }
             // CodeGen
 
@@ -1260,7 +1395,7 @@ public class SyntacticalAnalyser {
         // CodeGen
         int kindInt = 0;
         Token identifier = curToken;
-//        PCodes.add(new PCode(PCodeKind.PUSH, getIdentifier(identifier).scope + "-" + identifier.content));
+        PCodes.add(new PCode(PCodeKind.PUSH, getIdentifier(identifier).scope + "-" + identifier.content));
         // CodeGen
 
         // Error Handle

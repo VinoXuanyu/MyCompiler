@@ -15,9 +15,10 @@ public class VM {
     public Scanner scanner;
 
     public ArrayList<ReturnInfo> returnInfos = new ArrayList<>();
-    public ArrayList<Integer> stack = new ArrayList<>();
+    public ArrayList<Integer> st = new ArrayList<>();
     public HashMap<String, Variable> varTable = new HashMap<>();
     public HashMap<String, Function> funcTable = new HashMap<>();
+    public HashMap<String, Integer> labelTable = new HashMap<>();
 
     public VM(ArrayList<PCode> PCodes, FileWriter writer, Scanner scanner) {
         this.PCodes = PCodes;
@@ -36,15 +37,20 @@ public class VM {
             if (code.kind.equals(PCodeKind.FUNC)) {
                 funcTable.put((String) code.val1, new Function(i, (int) code.val2));
             }
+
+            // Labels
+            if (code.kind == PCodeKind.LABEL) {
+                labelTable.put((String) code.val1, i);
+            }
         }
     }
 
     public void push(int i) {
-        stack.add(i);
+        st.add(i);
     }
 
     public int pop() {
-        return stack.remove(stack.size() - 1);
+        return st.remove(st.size() - 1);
     }
 
     public Variable getVariable(String identifier) {
@@ -82,12 +88,13 @@ public class VM {
         boolean flagMain = false;
         ArrayList<Integer> realParams = new ArrayList<>();
         for(;p < PCodes.size(); p++) {
+//            System.out.println(p);
             PCode code = PCodes.get(p);
 
             switch (code.kind) {
 
-                case VAR : {
-                    Variable variable = new Variable(stack.size());
+                case VARIABLE: {
+                    Variable variable = new Variable(st.size());
                     varTable.put((String) code.val1, variable);
                 }
                 break;
@@ -102,7 +109,7 @@ public class VM {
                 case POP : {
                     int val = pop();
                     int addr = pop();
-                    stack.set(addr, val);
+                    st.set(addr, val);
                 }
                 break;
 
@@ -111,12 +118,12 @@ public class VM {
                 }
                 break;
 
-                case SUB : {
+                case SUBTRACT: {
                     push (-(pop() - pop()));
                 }
                 break;
 
-                case DIV : {
+                case DIVIDE: {
                     int operand = pop();
                     int secondOperand = pop();
                     push(secondOperand / operand);
@@ -130,7 +137,7 @@ public class VM {
                 }
                 break;
 
-                case MUL : {
+                case MULTIPLY: {
                     push(pop() * pop());
                 }
                 break;
@@ -140,10 +147,112 @@ public class VM {
                 }
                 break;
 
-                case POS : {}
+                case POS : {
+                    push(pop());
+                }
                 break;
 
-                case LABEL : {}
+                case LABEL: {}
+                break;
+
+                case CEQ: {
+                    if (pop() == pop()) {
+                        push(1);
+                    } else {
+                        push(0);
+                    }
+                }
+                break;
+
+                case CNE: {
+                    if (pop() != pop() ){
+                        push(1);
+                    } else{
+                        push(0);
+                    }
+                }
+                break;
+
+                case CLT: {
+                    if (pop() > pop()) {
+                        push(1);
+                    } else {
+                        push(0);
+                    }
+                }
+                break;
+
+                case CLE: {
+                    if (pop() >= pop()) {
+                        push(1);
+                    } else {
+                        push(0);
+                    }
+                }
+                break;
+
+                case CGT: {
+                    if (pop() < pop()) {
+                        push(1);
+                    } else {
+                        push(0);
+                    }
+                }
+                break;
+
+                case CGE: {
+                    if (pop() <= pop() ) {
+                        push(1);
+                    } else {
+                        push(0);
+                    }
+                }
+                break;
+
+                case AND: {
+                    if (pop() != 0 && pop() != 0) {
+                        push(1);
+                    } else {
+                        push(0);
+                    }
+                }
+                break;
+
+                case OR: {
+                    if (pop() != 0 || pop() != 0) {
+                        push(1);
+                    } else {
+                        push(0);
+                    }
+                }
+                break;
+
+                case NOT: {
+                    if (pop() == 0) {
+                        push(1);
+                    } else {
+                        push(0);
+                    }
+                }
+                break;
+
+                case JZ: {
+                    if (st.get(st.size() - 1) == 0) {
+                        p = labelTable.get((String) code.val1);
+                    }
+                }
+                break;
+
+                case JNZ: {
+                    if (st.get(st.size() -1 ) != 0) {
+                        p = labelTable.get((String) code.val1);
+                    }
+                }
+                break;
+
+                case JMP: {
+                    p = labelTable.get((String) code.val1);
+                }
                 break;
 
                 case FUNC: {
@@ -155,14 +264,14 @@ public class VM {
 
                 case MAIN : {
                     flagMain = true;
-                    returnInfos.add(new ReturnInfo(PCodes.size(), varTable, stack.size() -1, 0, 0, 0));
+                    returnInfos.add(new ReturnInfo(PCodes.size(), varTable, st.size() -1, 0, 0, 0));
                     varTable = new HashMap<>();
                 }
 
-                case ENDFUNC : {}
+                case FUNCEND: {}
                 break;
 
-                case PARA : {
+                case PARAM: {
                     Variable param = new Variable(realParams.get(realParams.size() - callArgsCount + nowArgsCount));
                     int n = (int) code.val2;
                     param.dimensions = n;
@@ -177,7 +286,7 @@ public class VM {
                 }
                 break;
 
-                case RET : {
+                case RETURN: {
                     int n = (int) code.val1;
                     ReturnInfo returnInfo = returnInfos.remove(returnInfos.size() - 1);
                     p = returnInfo.eip;
@@ -186,16 +295,16 @@ public class VM {
                     nowArgsCount = returnInfo.nowArgsCount;
 
                     if (n == 1) {
-                        stack.subList(returnInfo.stackPtr + 1 - returnInfo.paramsCount, stack.size() - 1).clear();
+                        st.subList(returnInfo.stackPtr + 1 - returnInfo.paramsCount, st.size() - 1).clear();
                     } else {
-                        stack.subList(returnInfo.stackPtr + 1 - returnInfo.paramsCount, stack.size()).clear();
+                        st.subList(returnInfo.stackPtr + 1 - returnInfo.paramsCount, st.size()).clear();
                     }
                 }
                 break;
 
                 case CALL : {
                     Function function = funcTable.get((String) code.val1);
-                    returnInfos.add(new ReturnInfo(p, varTable, stack.size() - 1, function.argCount, function.argCount, nowArgsCount));
+                    returnInfos.add(new ReturnInfo(p, varTable, st.size() - 1, function.argCount, function.argCount, nowArgsCount));
                     p = function.index;
 
                     varTable= new HashMap<>();
@@ -204,12 +313,12 @@ public class VM {
                 }
                 break;
 
-                case RPARA : {
+                case REALPARAM: {
                     int n = (int) code.val1;
                     if (n == 0) {
-                        realParams.add(stack.size() - 1);
+                        realParams.add(st.size() - 1);
                     } else {
-                        realParams.add(stack.get(stack.size() - 1));
+                        realParams.add(st.get(st.size() - 1));
                     }
                 }
                 break;
@@ -248,7 +357,7 @@ public class VM {
                     Variable variable = getVariable((String) code.val1);
                     int n = (int) code.val2;
                     int addr = getAddress(variable, n);
-                    push(stack.get(addr));
+                    push(st.get(addr));
                 }
                 break;
 
@@ -260,7 +369,7 @@ public class VM {
                 }
                 break;
 
-                case DIMVAR : {
+                case DIMVARIABLE: {
                     Variable var = getVariable((String) code.val1);
                     int n = (int) code.val2;
 
