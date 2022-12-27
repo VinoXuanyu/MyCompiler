@@ -210,7 +210,9 @@ public class VM {
                 break;
 
                 case AND: {
-                    if (pop() != 0 && pop() != 0) {
+                    int b = pop();
+                    int a = pop();
+                    if (a != 0 && b != 0) {
                         push(1);
                     } else {
                         push(0);
@@ -219,7 +221,9 @@ public class VM {
                 break;
 
                 case OR: {
-                    if (pop() != 0 || pop() != 0) {
+                    int b = pop();
+                    int a = pop();
+                    if (a != 0 || b != 0) {
                         push(1);
                     } else {
                         push(0);

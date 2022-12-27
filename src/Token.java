@@ -26,39 +26,6 @@ public class Token {
         return kind + " " + content;
     }
 
-    public boolean kindMatch(Kind kind) {
-        return this.kind == kind ;
-    }
-
-    public boolean kindStmt() {
-        return this.kind == Kind.IDENFR
-                || kind == Kind.LBRACE
-                || kind == Kind.IFTK
-                || kind == Kind.ELSETK
-                || kind == Kind.WHILETK
-                || kind == Kind.BREAKTK
-                || kind == Kind.CONTINUETK
-                || kind == Kind.RETURNTK
-                || kind == Kind.PRINTFTK
-                || kind == Kind.SEMICN
-                || kindExp();
-    }
-
-    public boolean kindExp() {
-        return kind == Kind.LPARENT
-                || kind == Kind.IDENFR
-                || kind == Kind.INTCON
-                || kind == Kind.NOT
-                || kind == Kind.PLUS
-                || kind == Kind.MINU;
-    }
-
-    public boolean kindUnary() {
-        return kind == Kind.PLUS
-                || kind == Kind.MINU
-                || kind == Kind.NOT;
-    }
-
     public int formatParamCount() {
         int count = 0;
         for (int i = 0; i < content.length() - 1; i++) {

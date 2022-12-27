@@ -14,6 +14,7 @@ public enum Kind {
     AND,
     OR,
     WHILETK,
+    DOTK,
     GETINTTK,
     PRINTFTK,
     RETURNTK,

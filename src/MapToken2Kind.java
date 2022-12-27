@@ -15,6 +15,7 @@ public class MapToken2Kind {
         map.put("&&", Kind.AND);
         map.put("||", Kind.OR);
         map.put("while", Kind.WHILETK);
+        map.put("do", Kind.DOTK);
         map.put("getint", Kind.GETINTTK);
         map.put("printf", Kind.PRINTFTK);
         map.put("return", Kind.RETURNTK);

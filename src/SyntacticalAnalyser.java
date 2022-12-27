@@ -795,6 +795,52 @@ public class SyntacticalAnalyser {
 
                 break;
 
+            case DOTK:
+                // Code Gen
+                temp = new HashMap<>();
+                labelsWhile.add(temp);
+
+                temp.put("while", labelGen.gen("while"));
+                temp.put("while_end", labelGen.gen("while_end"));
+                temp.put("while_block", labelGen.gen("while_block"));
+
+                PCodes.add(new PCode(PCodeKind.LABEL, temp.get("while_block")));
+                // Code Gen
+
+                moveForward(); // read do
+                whileFlag += 1;
+
+                StmtHandle();
+
+                if (curToken.kind != Kind.WHILETK) {
+                    handleError();
+                }
+                moveForward();
+
+                if (curToken.kind != Kind.LPARENT) {
+                    handleError();
+                }
+                moveForward();
+
+                PCodes.add(new PCode(PCodeKind.LABEL, temp.get("while")));
+                CondHandle(Kind.WHILETK);
+
+                if (curToken.kind != Kind.RPARENT) {
+                    handleError(prevToken().line, ErrorKind.MissParenthesis);
+                } else {
+                    moveForward();
+                }
+
+                // Code Gen
+                PCodes.add(new PCode(PCodeKind.JNZ, temp.get("while_block")));
+                PCodes.add(new PCode(PCodeKind.LABEL, temp.get("while_end")));
+
+                labelsWhile.remove(labelsWhile.size() - 1);
+                // Code Gen
+
+                whileFlag -= 1;
+
+                break;
             case WHILETK:
                 // Code Gen
                 temp = new HashMap<>();

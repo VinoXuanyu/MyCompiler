@@ -13,8 +13,8 @@ public class Compiler {
     public static void main(String[] args)  {
         try {
             FileHandler fileHandler = new FileHandler();
-//            Scanner scanner = new Scanner(new File(stdInput));
-            Scanner scanner = new Scanner(System.in);
+            Scanner scanner = new Scanner(new File(stdInput));
+//            Scanner scanner = new Scanner(System.in);
 //
             LexicalAnalyser lexicalAnalyser = new LexicalAnalyser();
             lexicalAnalyser.analyse();
@@ -28,6 +28,7 @@ public class Compiler {
             vm.run();
 //
             fileHandler.printRaw(VM.toPrint);
+
 
 
         } catch (Exception e) {
