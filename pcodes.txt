@@ -1,47 +1,14 @@
 MAIN main
 VARIABLE 1-i
 PUSH 1
-VARIABLE 1-count
+VARIABLE 1-j
+PUSH 3
+PUSH 1-i
+VALUE 1-i, 0
+PUSH 1-j
+VALUE 1-j, 0
+BITAND 
+PRINT "%d"
 PUSH 0
-label_while_block_3: 
-PUSH 1-count
-ADDRESS 1-count, 0
-PUSH 1-count
-VALUE 1-count, 0
-PUSH 1
-ADD 
-POP 1-count
-label_if_4: 
-PUSH 1-count
-VALUE 1-count, 0
-PUSH 5
-CLT 
-label_cond_0_8: 
-JZ label_else_5
-label_if_block_7: 
-JMP label_while_1
-JMP label_if_end_6
-label_else_5: 
-label_if_end_6: 
-PUSH 1-i
-ADDRESS 1-i, 0
-PUSH 1-i
-VALUE 1-i, 0
-PUSH 1
-ADD 
-POP 1-i
-PUSH 1-count
-VALUE 1-count, 0
-PUSH 1-i
-VALUE 1-i, 0
-PRINT "%d %d
-"
-label_while_1: 
-PUSH 1-count
-VALUE 1-count, 0
-PUSH 10
-CLT 
-label_cond_0_9: 
-JNZ label_while_block_3
-label_while_end_2: 
+RETURN 1
 EXIT 

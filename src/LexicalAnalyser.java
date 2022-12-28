@@ -38,7 +38,7 @@ public class LexicalAnalyser {
         while ((ch = moveForward()) != null) {
             if (ch == ' ' || ch == '\r' || ch == '\t') {
                 continue;
-            } else if (ch == '+' || ch == '-' || ch == '*' || ch == '%') {
+            } else if (ch == '-' || ch == '*' || ch == '%') {
                 tokens.add(new Token(ch, line));
             } else if (ch == '/') {
                 parseSlash();
@@ -50,7 +50,7 @@ public class LexicalAnalyser {
                 tokens.add(new Token(ch, line));
             } else if (ch == '"') {
                 parseQuote();
-            } else if (ch == '&' || ch == '|') {
+            } else if (ch == '&' || ch == '|' || ch == '+') {
                 parseLogic(ch);
             } else if (Character.isDigit(ch)) {
                 parseDigit(ch);
@@ -161,7 +161,15 @@ public class LexicalAnalyser {
                     moveBackward();
                     tokens.add(new Token("&", line));
                 }
-            } else {
+            } else if (pre == '+') {
+                if (c == '+') {
+                    tokens.add(new Token("++", line));
+                } else {
+                    moveBackward();
+                    tokens.add(new Token("+", line));
+                }
+            }
+            else {
                 if (c == '|') {
                     tokens.add(new Token("||", line));
                 } else {

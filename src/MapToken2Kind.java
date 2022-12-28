@@ -4,6 +4,7 @@ public class MapToken2Kind {
     public static HashMap<String, Kind> map = new HashMap<>();
 
     static {
+        map.put("bitand", Kind.BITANDTK);
         map.put("main", Kind.MAINTK);
         map.put("const", Kind.CONSTTK);
         map.put("int", Kind.INTTK);
@@ -20,6 +21,7 @@ public class MapToken2Kind {
         map.put("printf", Kind.PRINTFTK);
         map.put("return", Kind.RETURNTK);
         map.put("+", Kind.PLUS);
+        map.put("++", Kind.INCR);
         map.put("-", Kind.MINU);
         map.put("void", Kind.VOIDTK);
         map.put("*", Kind.MULT);

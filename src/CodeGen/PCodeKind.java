@@ -16,6 +16,7 @@ public enum PCodeKind {
     CLT,
     CGE,
     CLE,
+    BITAND,
     AND,
     OR,
     NOT,

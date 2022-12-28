@@ -372,7 +372,18 @@ public class SyntacticalAnalyser {
 
         if (curToken.kind == Kind.ASSIGN) {
             moveForward();
-            InitValHandle();
+            if (curToken.kind == Kind.GETINTTK) {
+                // CodeGen
+//                PCodes.add(new PCode(PCodeKind.ADDRESS, getIdentifier(identifier).scope + "-" + identifier.content, kindInt));
+                PCodes.add(new PCode(PCodeKind.GETINT));
+//                PCodes.add(new PCode(PCodeKind.POP, getIdentifier(identifier).scope + "-" + identifier.content));
+                // CodeGen
+                moveForward();
+                moveForward();
+                moveForward();
+            } else {
+                InitValHandle();
+            }
         } else {
             // CodeGen
             PCodes.add(new PCode(PCodeKind.PLACEHOLDER, scope + "-" + identifier.content, kindInt));
@@ -1135,7 +1146,7 @@ public class SyntacticalAnalyser {
         int kindInt = 0;
 
         kindInt = UnaryExpHandle();
-        while (curToken.kind == Kind.MULT || curToken.kind == Kind.DIV || curToken.kind == Kind.MOD) {
+        while (curToken.kind == Kind.MULT || curToken.kind == Kind.DIV || curToken.kind == Kind.MOD || curToken.kind == Kind.BITANDTK) {
             Kind kind = curToken.kind;
             wrapNonterminal(Nonterminal.MulExp);
             moveForward();
@@ -1146,7 +1157,10 @@ public class SyntacticalAnalyser {
                 PCodes.add(new PCode(PCodeKind.MULTIPLY));
             } else if (kind == Kind.DIV) {
                 PCodes.add(new PCode(PCodeKind.DIVIDE));
-            } else {
+            } else if (kind == Kind.BITANDTK) {
+                PCodes.add(new PCode(PCodeKind.BITAND));
+            }
+            else {
                 PCodes.add(new PCode(PCodeKind.MOD));
             }
             //CodeGen

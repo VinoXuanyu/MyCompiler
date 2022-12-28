@@ -1,5 +1,7 @@
 public enum Kind {
+    BITANDTK,
     VOID,
+    INCR,
     IDENFR,
     INTCON,
     STRCON,

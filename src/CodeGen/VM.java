@@ -209,6 +209,13 @@ public class VM {
                 }
                 break;
 
+                case BITAND: {
+                    int b = pop();
+                    int a = pop();
+                    push(b & a);
+                }
+                break;
+
                 case AND: {
                     int b = pop();
                     int a = pop();
